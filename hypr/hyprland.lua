@@ -1,4 +1,4 @@
--- CachyOS Hyprland Configuration
+-- Bry's Hyprland Configuration
 
 require("config.animations")
 require("config.environment")
@@ -12,6 +12,7 @@ require("config.misc")
 require("config.monitors")
 require("config.windowrules")
 require("config.workspaces")
+require("config.plugins")
 
 -- For Noctalia Color templates
 require("noctalia").apply_theme()

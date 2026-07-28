@@ -1,30 +1,32 @@
 -- Window rules wiki https://wiki.hypr.land/Configuring/Basics/Window-Rules/
 
--- Generic floating position
+-- Generic floating position (Put this right here)
 hl.window_rule({ match = { float = true }, center = true })
 
 -- Picture-in-Picture
 hl.window_rule({
-    match             = { title = "^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$" },
-    float             = true,
-    keep_aspect_ratio = true,
-    size              = { "max(monitor_w, monitor_h)*0.25", "min(monitor_w, monitor_h)*0.25" },
-    pin               = true,
+    match               = { title = "^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$" },
+               float               = true,
+               keep_aspect_ratio   = true,
+               size                = { "max(monitor_w, monitor_h)*0.25", "min(monitor_w, monitor_h)*0.25" },
+               pin                 = true,
 })
 
 -- Gaming
 local gamingApps = "^(steam_app.*|gamescope)$"
+local nativeGames = "^(cs2|deadlock|dota2)$"
 local gamingWorkspace = "name:gaming"
 
 hl.window_rule({ match = { content = "game" }, workspace = gamingWorkspace })
 hl.window_rule({ match = { class = gamingApps }, workspace = gamingWorkspace })
+hl.window_rule({ match = { class = nativeGames }, workspace = gamingWorkspace })
 hl.window_rule({ match = { class = "^(steam)$", title = "^(Friends List)$" }, float = true })
 hl.window_rule({ match = { class = "^(steam)$", title = "^(Launching\\.{3})$" }, float = true, center = true, workspace = gamingWorkspace })
 hl.window_rule({
     match = {
         class         = gamingApps,
         title         = "^(.+)$",
-        initial_title = "negative:^(.*\\\\home\\\\.*)$",
+               initial_title = "negative:^(.*\\\\home\\\\.*)$",
     },
     content          = "game",
     decorate         = false,
@@ -35,7 +37,7 @@ hl.window_rule({
 hl.window_rule({
     match = {
         class         = "^(steam_app.*)$",
-        initial_title = "^$",
+               initial_title = "^$",
     },
     center           = true,
     float            = true,
@@ -56,21 +58,17 @@ hl.window_rule({ match = { class = "^(dev\\.)?(noctalia\\.Noctalia(\\.Settings)?
 hl.window_rule({
     match = {
         class = "^(org\\.kde\\.dolphin)$",
-        title = "negative:^(Moving.*|Create New.*|Extract.*|Compress.*|Copying.*|Progress.*|Configure.*|Properties.*|Choose\\sApplication.*)$",
+               title = "negative:^(Moving.*|Create New.*|Extract.*|Compress.*|Copying.*|Progress.*|Configure.*|Properties.*|Choose\\sApplication.*)$",
     },
     float = true,
     size = { "max(monitor_w, monitor_h)*0.50", "min(monitor_w, monitor_h)*0.55" },
-    move = {
-        "max(20, min(cursor_x - (window_w*0.50), monitor_w - window_w + 20))", -- X axis clamping
-        "max(20, min(cursor_y - 50, monitor_h - window_h + 20))" -- Y axis clamping
-    },
 })
 
 -- Opacity Overrides
 local terminals = "^(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)$"
 
 hl.window_rule({ match = { class = "^(firefox|zen)$" }, opacity = "1.0 override" })
-hl.window_rule({ match = { class = terminals }, opacity = "1.0 override" }) -- Override opacity in favor of terminal settings for opacity. If your terminal doesn't support transparency, you can remove this rule.
+hl.window_rule({ match = { class = terminals }, opacity = "1.0 override" })
 hl.window_rule({ match = { class = "^(mpv|org.kde.haruna|.*plex.*|org\\.kde\\.gwenview|.*vlc.*)$" }, opacity = "1.0 override" })
 
 -- Float Utility Windows
@@ -81,35 +79,38 @@ local floatApps = {
 }
 for _, m in ipairs(floatApps) do hl.window_rule({ match = m, float = true }) end
 
--- Float Common Modals
-local modalMatches = {
-    { title = "^(Open|Authentication Required|Add Folder to Workspace|Choose Files|Save As|Confirm to replace files|File Operation Progress)$" },
-    { initial_title = "^(Open File)$" },
-    { class = "^([Xx]dg-desktop-portal-gtk)$" },
-    { title = "^(File Upload|Choose wallpaper|Library)(.*)$" },
-    { class = "^(.*dialog.*)$" },
-    { title = "^(.*dialog.*)$" },
-    { class = "^(hyprland-share-picker)$"},
-}
-for _, m in ipairs(modalMatches) do hl.window_rule({ match = m, float = true }) end
+    -- Float Common Modals
+    local modalMatches = {
+        { title = "^(Open|Authentication Required|Add Folder to Workspace|Choose Files|Save As|Confirm to replace files|File Operation Progress)$" },
+        { initial_title = "^(Open File)$" },
+        { class = "^([Xx]dg-desktop-portal-gtk)$" },
+        { title = "^(File Upload|Choose wallpaper|Library)(.*)$" },
+        { class = "^(.*dialog.*)$" },
+        { title = "^(.*dialog.*)$" },
+        { class = "^(hyprland-share-picker)$"},
+    }
+    for _, m in ipairs(modalMatches) do hl.window_rule({ match = m, float = true }) end
 
--- Ignore maximize requests from all apps. You'll probably like this.
-hl.window_rule({
-    name  = "suppress-maximize-events",
-    match = { class = ".*" },
-    suppress_event = "maximize",
-})
+        -- Ignore maximize requests from all apps. You'll probably like this.
+        hl.window_rule({
+            name  = "suppress-maximize-events",
+            match = { class = ".*" },
+            suppress_event = "maximize",
+        })
 
--- Fix some dragging issues with XWayland
-hl.window_rule({
-    name  = "fix-xwayland-drags",
-    match = {
-        class      = "^$",
-        title      = "^$",
-        xwayland   = true,
-        float      = true,
-        fullscreen = false,
-        pin        = false,
-    },
-    no_focus = true,
-})
+        -- Fix some dragging issues with XWayland
+        hl.window_rule({
+            name  = "fix-xwayland-drags",
+            match = {
+                class      = "^$",
+                title      = "^$",
+                xwayland   = true,
+                float      = true,
+                fullscreen = false,
+                pin        = false,
+            },
+            no_focus = true,
+        })
+
+        -- Allow screen tearing for competitive games to minimize input lag
+        hl.window_rule({ match = { class = "^(steam_app_730|steam_app_1422450|steam_app_2767030|steam_app_2356550|steam_app_105600)$" }, immediate = true })

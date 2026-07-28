@@ -8,19 +8,58 @@ local launchPrefix = "uwsm app -- " -- if you are not using UWSM, make this empt
 
 -- Window manipulation
 hl.bind(mainMod .. " + Escape",      hl.dsp.exec_cmd("hyprctl kill"))
-hl.bind(mainMod .. " + Q",           hl.dsp.window.close())
+hl.bind ("CTRL + Q ",                hl.dsp.window.close())
 hl.bind(mainMod .. " + ALT + Space", hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + W",           hl.dsp.window.fullscreen({ mode = 1 }))
 hl.bind(mainMod .. " + F",           hl.dsp.window.fullscreen())
 hl.bind(mainMod .. " + J",           hl.dsp.layout("togglesplit"))
 
--- Change focus
-hl.bind(mainMod .. " + Left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + Right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + Up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + Down",  hl.dsp.focus({ direction = "down" }))
-hl.bind("ALT + Tab",           hl.dsp.window.cycle_next())
-hl.bind(mainMod .. " + Tab",   hl.dsp.exec_cmd(noctCall .. "window-switcher"))
+-- Change focus (Updated with Hyprtasking)
+hl.bind(mainMod .. " + Left", function()
+if hl.plugin.hyprtasking.is_active() then
+    hl.plugin.hyprtasking.move("left")
+    else
+        hl.dispatch(hl.dsp.focus({ direction = "left" }))
+        end
+        end)
+
+hl.bind(mainMod .. " + Right", function()
+if hl.plugin.hyprtasking.is_active() then
+    hl.plugin.hyprtasking.move("right")
+    else
+        hl.dispatch(hl.dsp.focus({ direction = "right" }))
+        end
+        end)
+
+hl.bind(mainMod .. " + Up", function()
+if hl.plugin.hyprtasking.is_active() then
+    hl.plugin.hyprtasking.move("up")
+    else
+        hl.dispatch(hl.dsp.focus({ direction = "up" }))
+        end
+        end)
+
+hl.bind(mainMod .. " + Down", function()
+if hl.plugin.hyprtasking.is_active() then
+    hl.plugin.hyprtasking.move("down")
+    else
+        hl.dispatch(hl.dsp.focus({ direction = "down" }))
+        end
+        end)
+
+hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
+
+-- Toggle Hyprtasking Overview on current monitor
+hl.bind(mainMod .. " + Tab", function()
+hl.plugin.hyprtasking.toggle("cursor")
+end)
+
+-- Optional: Close overview with Escape safely
+hl.bind("Escape", function()
+if hl.plugin.hyprtasking.is_active() then
+    hl.plugin.hyprtasking.toggle("cursor")
+    end
+    end, { non_consuming = true })
 
 -- Move window position
 hl.bind(mainMod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "left" }))
@@ -36,10 +75,9 @@ hl.bind(mainMod .. " + CONTROL + SHIFT + Right",      hl.dsp.window.move({ works
 hl.bind(mainMod .. " + CONTROL + SHIFT + Left",       hl.dsp.window.move({ workspace = "r-1" }))
 hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_up",   hl.dsp.window.move({ workspace = "r+1" }))
 hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_down", hl.dsp.window.move({ workspace = "r-1" }))
-for i = 1, NUM_WPM do
-    local key = i % 10
-    hl.bind(mainMod .. " + SHIFT + CONTROL + " .. key, hl.dsp.window.move({ workspace = "m~" .. i }))
-end
+for i = 1, 9 do
+    hl.bind(mainMod .. " + SHIFT + CONTROL + " .. i, hl.dsp.window.move({ workspace = i, follow = false }))
+    end
 
 -- Move & Resize with mouse
 hl.bind(mainMod .. " + mouse:272", hl.dsp.window.drag())
@@ -68,7 +106,6 @@ hl.bind(mainMod .. " + Space",      hl.dsp.exec_cmd(noctCall .. "panel-toggle la
 hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd(noctCall .. "panel-toggle launcher /emo"))
 hl.bind(mainMod .. " + L",          hl.dsp.exec_cmd(noctCall .. "session lock"))
 hl.bind(mainMod .. " + ALT + C",    hl.dsp.exec_cmd(noctCall .. "panel-toggle session"))
-hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(noctCall .. "panel-open control-center audio"))
 
 ---------------------------
 ---- HARDWARE CONTROLS ----
@@ -79,6 +116,7 @@ hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd(noctCall .. "volume-up"),   { lo
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(noctCall .. "volume-down"), { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd(noctCall .. "volume-mute"), { locked = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd(noctCall .. "mic-mute"),    { locked = true })
+hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(noctCall .. "panel-toggle control-center audio"))
 
 -- Media
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd(noctCall .. "media toggle"),   { locked = true })
@@ -95,7 +133,7 @@ hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd(noctCall .. "brightness-down"),
 -------------------
 
 -- Screen Capture
-hl.bind(mainMod .. " + ALT + P",    hl.dsp.exec_cmd("hyprpicker -a"))
+hl.bind(mainMod .. " + ALT + P",     hl.dsp.exec_cmd("hyprpicker -a"))
 hl.bind("Print",               hl.dsp.exec_cmd(noctCall .. "screenshot-region"))
 hl.bind(mainMod .. " + Print", hl.dsp.exec_cmd(noctCall .. "screenshot-fullscreen"))
 
@@ -104,6 +142,7 @@ hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(noctCall .. "panel-toggle wal
 
 -- Clipboard
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(noctCall .. "panel-toggle clipboard"))
+
 
 -------------------------------
 ---- WORKSPACES & MONITORS ----
@@ -126,11 +165,18 @@ hl.bind(mainMod .. " + CONTROL + Right",       hl.dsp.focus({ workspace = "e+1" 
 hl.bind(mainMod .. " + CONTROL + Left",        hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mainMod .. " + CONTROL + Down",        hl.dsp.focus({ workspace = "emptym" }))
 
+-- Add direct keybind to your gaming workspace
+hl.bind(mainMod .. " + G", hl.dsp.focus({ workspace = "name:gaming" }))
+
 -- Scroll through existing workspaces & monitors
 hl.bind(mainMod .. " + mouse_down",           hl.dsp.focus({ workspace = "m+1" }))
 hl.bind(mainMod .. " + mouse_up",             hl.dsp.focus({ workspace = "m-1" }))
 hl.bind(mainMod .. " + CONTROL + mouse_up",   hl.dsp.focus({ workspace = "m+1" }))
 hl.bind(mainMod .. " + CONTROL + mouse_down", hl.dsp.focus({ workspace = "m-1" }))
+
+-- Cycle workspaces with Super + Ctrl + Keyboard Volume Wheel
+hl.bind(mainMod .. " + CONTROL + XF86AudioRaiseVolume", hl.dsp.focus({ workspace = "e+1" }), { repeating = true })
+hl.bind(mainMod .. " + CONTROL + XF86AudioLowerVolume", hl.dsp.focus({ workspace = "e-1" }), { repeating = true })
 
 -- Special workspace (scratchpad)
 -- Bring window out of scratchpad to current workspace

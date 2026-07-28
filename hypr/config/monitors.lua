@@ -8,8 +8,11 @@
 -- })
 
 hl.monitor({
-    output    = MONITOR1,
-    mode      = "preferred",
-    position  = "auto",
-    scale     = "auto",
+    output            = "DP-1",
+    mode              = "2560x1440@240",
+    position          = "0x0",
+    scale             = 1,
+    bitdepth          = 10,
+    cm                = "srgb", -- Standard sRGB SDR color management
+    vrr               = 2,      -- 1 = Always On, 2 = Fullscreen Only (Recommended)
 })
