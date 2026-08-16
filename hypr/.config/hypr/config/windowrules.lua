@@ -50,6 +50,11 @@ hl.window_rule({
 })
 
 -- Apps
+
+-- One size for file-management windows so Dolphin and the portal file picker
+-- always match. Change it here and both follow.
+local fileWindowSize = { "max(monitor_w, monitor_h)*0.50", "min(monitor_w, monitor_h)*0.55" }
+
 hl.window_rule({ match = { class = "^(.*\\.exe)$", float = true }, monitor = PRIMARY_MONITOR, center = true, fullscreen_state = 0 })
 hl.window_rule({ match = { class = "^(.*[Ll]auncher.*)$" }, float = true, monitor = PRIMARY_MONITOR })
 hl.window_rule({ match = { class = "^(vesktop|discord)$" }, monitor = PRIMARY_MONITOR })
@@ -62,13 +67,21 @@ hl.window_rule({
                min_size = { "max(monitor_w, monitor_h)*0.35", "min(monitor_w, monitor_h)*0.35" },
 })
 hl.window_rule({ match = { class = "^(dev\\.)?(noctalia\\.Noctalia(\\.Settings)?)$" }, float = true, size = { "monitor_w*0.70", "monitor_h*0.70" } })
+
+-- Portal file pickers default to ~750x690, which is small on 1440p.
+-- Matches the dotted KDE class; the gtk backend uses a hyphenated class and
+-- is left at its own default. Float/centre come from the modal rules above.
+hl.window_rule({
+    match = { class = "^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*)$" },
+    size  = fileWindowSize,
+})
 hl.window_rule({
     match = {
         class = "^(org\\.kde\\.dolphin)$",
                title = "negative:^(Moving.*|Create New.*|Extract.*|Compress.*|Copying.*|Progress.*|Configure.*|Properties.*|Choose\\sApplication.*)$",
     },
     float = true,
-    size = { "max(monitor_w, monitor_h)*0.50", "min(monitor_w, monitor_h)*0.55" },
+    size = fileWindowSize,
 })
 
 -- Opacity Overrides
@@ -90,7 +103,12 @@ for _, m in ipairs(floatApps) do hl.window_rule({ match = m, float = true }) end
     local modalMatches = {
         { title = "^(Open|Authentication Required|Add Folder to Workspace|Choose Files|Save As|Confirm to replace files|File Operation Progress)$" },
         { initial_title = "^(Open File)$" },
-        { class = "^([Xx]dg-desktop-portal-gtk)$" },
+        -- Portal backends use two different class conventions:
+        --   gtk/hyprland: xdg-desktop-portal-gtk      (hyphens)
+        --   kde:          org.freedesktop.impl.portal.desktop.kde  (dots)
+        -- Verified with hyprctl activewindow. Both forms needed.
+        { class = "^(.*[Xx]dg-[Dd]esktop-[Pp]ortal.*)$" },
+        { class = "^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*)$" },
         { title = "^(File Upload|Choose wallpaper|Library)(.*)$" },
         { class = "^(.*dialog.*)$" },
         { title = "^(.*dialog.*)$" },

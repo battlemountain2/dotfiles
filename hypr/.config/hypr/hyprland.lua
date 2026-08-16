@@ -23,3 +23,6 @@ pcall(require,"optional.monitors-gaming")
 require("config.windowrules")
 require("config.workspaces")
 pcall(require, "optional.plugins")
+
+-- For Noctalia Color templates
+require("noctalia").apply_theme()
