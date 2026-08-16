@@ -1,6 +1,9 @@
 local noctalia_colors = require("noctalia").colors
 
 hl.config({
+    render = {
+        cm_auto_hdr = 1,
+    },
     dwindle = {
         preserve_split = true,
     },
@@ -11,7 +14,6 @@ hl.config({
         middle_click_paste = false,
         enable_swallow = true,
         swallow_regex = "(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
-          vrr = 1,
     },
     xwayland = {
         force_zero_scaling = true
@@ -21,3 +23,4 @@ hl.config({
         no_donation_nag = true,
     },
 })
+

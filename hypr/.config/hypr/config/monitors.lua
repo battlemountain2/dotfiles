@@ -6,13 +6,13 @@
 --     position  = "0x0",
 --     scale     = "1",
 -- })
-
 hl.monitor({
-    output            = "DP-1",
-    mode              = "2560x1440@240",
-    position          = "0x0",
-    scale             = 1,
-    bitdepth          = 10,
-    cm                = "srgb", -- Standard sRGB SDR color management
-    vrr               = 2,      -- 1 = Always On, 2 = Fullscreen Only (Recommended)
+    output             = "DP-1",
+    mode               = "2560x1440@240",
+    position           = "0x0",
+    scale              = "1.00",
+    bitdepth           = 10,
+    cm                 = "srgb",
+    supports_hdr       = 1,
+    sdr_max_luminance  = 300,
 })

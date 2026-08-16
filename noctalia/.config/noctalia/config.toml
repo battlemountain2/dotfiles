@@ -27,6 +27,25 @@ thickness = 35
     opacity = 1.0
     padding = 6.0
 
+[idle]
+# Fade the screen for this long before an idle action fires.
+pre_action_fade_seconds = 2.0
+
+    # Desktop machine: blank the display, but don't auto-lock.
+    # SUPER + L still locks on demand (noctalia msg session lock).
+    [idle.behavior.screen-off]
+    timeout = 900
+    command = "noctalia:dpms-off"
+    resume_command = "noctalia:dpms-on"
+    enabled = true
+
+    # Left here deliberately, switched off, so it's obvious this is a
+    # choice rather than an oversight. Flip enabled to true to auto-lock.
+    [idle.behavior.lock]
+    timeout = 1800
+    command = "noctalia:session lock"
+    enabled = false
+
 [shell]
 clipboard_image_action_command = "satty -f -"
 launch_apps_as_systemd_services = true
@@ -114,11 +133,13 @@ color = "error"
 type = "spacer"
 
 [widget.temp]
-show_label = false
+type = "sysmon"      
+stat = "cpu_temp"
+show_value = false    
 
 [widget.sysmon_2]
 glyph = "gpu-usage"
-show_label = false
+show_value = false
 stat = "gpu_temp"
 type = "sysmon"
 
@@ -135,9 +156,10 @@ capsule_fill = "on_secondary"
 color = "secondary"
 
 [widget.workspaces]
+show_labels = false   # was display = "none"
+label_source = "id"
 active_pill_size = 2.5
 capsule = true
 capsule_fill = "on_primary"
-display = "none"
 inactive_pill_size = 1.0
 pill_scale = 0.80

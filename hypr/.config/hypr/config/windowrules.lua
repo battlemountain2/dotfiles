@@ -12,10 +12,13 @@ hl.window_rule({
                pin                 = true,
 })
 
+-- Smart borders: keep gaps + rounding, drop the border on a lone tiled window
+hl.window_rule({ match = { float = false, workspace = "w[tv1]s[false]" }, border_size = 0 })
+
 -- Gaming
 local gamingApps = "^(steam_app.*|gamescope)$"
 local nativeGames = "^(cs2|deadlock|dota2)$"
-local gamingWorkspace = "name:gaming"
+local gamingWorkspace = "9"
 
 hl.window_rule({ match = { content = "game" }, workspace = gamingWorkspace })
 hl.window_rule({ match = { class = gamingApps }, workspace = gamingWorkspace })
@@ -53,7 +56,11 @@ hl.window_rule({ match = { class = "^(vesktop|discord)$" }, monitor = PRIMARY_MO
 hl.window_rule({ match = { class = "^(.*[Cc]alc.*)$" }, float = true, size = { "max(monitor_w, monitor_h)*0.17", "min(monitor_w, monitor_h)*0.43" } })
 hl.window_rule({ match = { class = "^(org\\.kde\\.keditfiletype)$" }, float = true })
 hl.window_rule({ match = { class = "^(org\\.kde\\.ark)$" }, size = { "max(monitor_w, monitor_h)*0.40", "min(monitor_w, monitor_h)*0.40" } })
-hl.window_rule({ match = { class = "^(.*satty.*)$", title = "^(Satty)$" }, min_size = { "max(monitor_w, monitor_h)*0.35", "min(monitor_w, monitor_h)*0.35" }, float = true })
+hl.window_rule({
+    match = { class = "^(.*satty.*)$" },
+               float = true,
+               min_size = { "max(monitor_w, monitor_h)*0.35", "min(monitor_w, monitor_h)*0.35" },
+})
 hl.window_rule({ match = { class = "^(dev\\.)?(noctalia\\.Noctalia(\\.Settings)?)$" }, float = true, size = { "monitor_w*0.70", "monitor_h*0.70" } })
 hl.window_rule({
     match = {
@@ -113,4 +120,5 @@ for _, m in ipairs(floatApps) do hl.window_rule({ match = m, float = true }) end
         })
 
         -- Allow screen tearing for competitive games to minimize input lag
-        hl.window_rule({ match = { class = "^(steam_app_730|steam_app_1422450|steam_app_2767030|steam_app_2356550|steam_app_105600)$" }, immediate = true })
+        local tearingGames = "^(cs2|deadlock|dota2|steam_app_730|steam_app_1422450|steam_app_2767030|steam_app_2356550|steam_app_105600)$"
+        hl.window_rule({ match = { class = tearingGames }, immediate = true })
