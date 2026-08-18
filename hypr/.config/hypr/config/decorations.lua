@@ -9,29 +9,9 @@ hl.config({
         border_size = 2,
         extend_border_grab_area = 10,
         resize_on_border = true,
-        col = {
-            active_border = {
-                colors = { colors.PRIMARY, colors.ACCENT },
-          angle = 45,
-            },
-          inactive_border = colors.SURFACE,
-        },
-    },
-    group = {
-        col = {
-            border_active = colors.PRIMARY,
-          border_inactive = colors.SURFACE,
-          border_locked_active = colors.ACCENT,
-          border_locked_inactive = colors.SURFACE,
-        },
-        groupbar = {
-            col = {
-                active = colors.PRIMARY,
-          inactive = colors.SURFACE,
-          locked_active = colors.ACCENT,
-          locked_inactive = colors.SURFACE,
-            },
-        },
+        -- Border COLOURS are NOT here. They live in config/borders.lua, which
+        -- hyprland.lua requires after Noctalia's appended apply_theme() --
+        -- otherwise that call overwrites them and this block does nothing.
     },
     decoration = {
         -- Squircle corners. The superellipse is what reads as "designed"
@@ -95,9 +75,9 @@ hl.config({
 })
 
 hl.layer_rule({
-    name = "noctalia",
+    name = "shell-surfaces",
     match = {
-        namespace = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$",
+        namespace = SHELL_LAYER,  -- set in config/variables.lua
     },
     no_anim = true,
     ignore_alpha = 0.5,

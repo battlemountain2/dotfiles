@@ -10,7 +10,7 @@ hl.exec_cmd("/usr/lib/kdeconnectd")
 hl.exec_cmd("wl-paste --type text --watch cliphist store")
 hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
-hl.exec_cmd("noctalia")
+hl.exec_cmd(SHELL_CMD)
 
 -- kded6 is kept for plasma_accentcolor_service (writes accent into kdeglobals).
 -- Its Plasma-shell-specific modules are disabled in ~/.config/kded6rc, which is

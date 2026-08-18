@@ -1,11 +1,14 @@
--- Monitor wiki https://wiki.hypr.land/Configuring/Basics/Monitors/
--- Example: output can be found with hyprctl monitors. Edit variables.lua for the monitor outputs instead of here directly
--- hl.monitor({
---     output    = "MONITOR1",
---     mode      = "1920x1080@60",
---     position  = "0x0",
---     scale     = "1",
--- })
+-- Monitor config for host `cachyos-x8664`.
+--
+-- Selected by hyprland.lua, which tries optional/monitors-<hostname>.lua and
+-- falls back to optional/monitors-default.lua. Another machine gets its own
+-- file; nothing here needs to be portable.
+--
+-- Wiki: https://wiki.hypr.land/Configuring/Basics/Monitors/
+-- Output names come from `hyprctl monitors`.
+--
+-- Merged from the old config/monitors.lua. render.cm_auto_hdr in
+-- config/misc.lua is a no-op without supports_hdr set here.
 
 hl.monitor({
     output = "DP-1",

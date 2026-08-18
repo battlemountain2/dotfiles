@@ -1,5 +1,5 @@
 local mainMod = "SUPER"
-local noctCall = "noctalia msg "
+local noctCall = SHELL_IPC  -- set in config/variables.lua
 local launchPrefix = "" -- if you are not using UWSM, make this empty (e.g. "")
 
 ---------------------------
