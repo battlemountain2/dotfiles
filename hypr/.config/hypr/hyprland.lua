@@ -68,10 +68,10 @@ require("config.windowrules")
 require("config.workspaces")
 pcall(require, "optional.plugins")
 
--- APPENDED BY NOCTALIA -- do not rely on anything after this line staying put.
--- Noctalia's Hyprland template re-adds this on every theme regeneration, and
--- because it lands at the end of the file it overrides the border colours set
--- in config/decorations.lua.
+-- MANAGED BY NOCTALIA. Its Hyprland template re-adds this line if it goes
+-- missing, so deleting it is pointless. Verified 2026-08 that it only ensures
+-- the line exists -- it does not rewrite what follows, which is what makes the
+-- block below work.
 require("noctalia").apply_theme()
 
 -- ---------------------------------------------------------------------------
@@ -80,8 +80,8 @@ require("noctalia").apply_theme()
 -- That is the entire point: apply_theme() sets general.col.* and group.col.*,
 -- so our border colours have to be applied after it or they do nothing.
 --
--- If this require ever vanishes, or ends up ABOVE the apply_theme() line, then
--- Noctalia rewrites the tail of this file on every theme regeneration and this
--- approach is dead -- see the notes in config/borders.lua.
+-- Verified to survive theme regeneration. If this require ever vanishes or
+-- ends up ABOVE the apply_theme() line, Noctalia's behaviour changed and
+-- borders will silently go flat -- see the notes in config/borders.lua.
 -- ---------------------------------------------------------------------------
 require("config.borders")

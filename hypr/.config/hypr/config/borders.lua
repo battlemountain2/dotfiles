@@ -4,13 +4,16 @@
 -- the END of hyprland.lua, and apply_theme() sets these exact keys. Last write
 -- wins, so this module is required AFTER that line rather than before it.
 --
--- TEST IN PROGRESS (2026-08): this works only if Noctalia adds its line when
--- missing rather than rewriting the file tail every regeneration. To check:
--- change your wallpaper, then run
+-- VERIFIED 2026-08: Noctalia adds its apply_theme() line only when missing --
+-- it does NOT rewrite the tail of hyprland.lua on regeneration. Confirmed by
+-- changing the wallpaper and checking that both the gradient and the require
+-- below it survived. So this arrangement is stable, not a temporary hack.
+--
+-- If borders ever go flat again, check that hyprland.lua still ends with
+-- `require("config.borders")` BELOW the apply_theme() line -- that ordering is
+-- the whole mechanism. Verify with:
 --     hyprctl getoption general:col.active_border
--- Two colours + 45deg -> this survived, the arrangement holds.
--- One colour  + 0deg  -> Noctalia rewrote the tail; this file lost, and the
---                        fallback is to let Noctalia own borders outright.
+-- Two colours + 45deg = correct. One colour + 0deg = the ordering broke.
 
 local colors = require("config.colors")
 
