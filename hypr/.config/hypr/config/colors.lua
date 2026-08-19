@@ -6,7 +6,10 @@
 -- derived with a fallback chain, so a regenerated noctalia.lua can add roles
 -- (accent, tertiary, background) and they get picked up automatically -- and
 -- can drop them again without going nil.
-local noctalia = require("noctalia").colors
+-- SHELL_THEME_MODULE, not a literal "noctalia": this file is the one place
+-- that knows which shell generates the palette, and variables.lua is the one
+-- place that names it. Between them, a shell swap touches no other file.
+local shell = require(SHELL_THEME_MODULE).colors
 
 -- First non-nil argument wins. This cannot use ipairs({...}), which stops at
 -- the first nil and would defeat the entire point.
@@ -19,29 +22,29 @@ end
 
 local colors = {
     -- Roles noctalia.lua emits directly
-    PRIMARY    = noctalia.primary,
-    SECONDARY  = noctalia.secondary,
-    SURFACE    = noctalia.surface,
-    ERROR      = noctalia.error,
+    PRIMARY    = shell.primary,
+    SECONDARY  = shell.secondary,
+    SURFACE    = shell.surface,
+    ERROR      = shell.error,
 
     -- Derived roles: not emitted today. A nil here silently collapses the
     -- border gradient to a single stop, which is what used to happen.
-    ACCENT     = pick(noctalia.accent, noctalia.secondary, noctalia.primary),
-    TERTIARY   = pick(noctalia.tertiary, noctalia.secondary, noctalia.primary),
-    BACKGROUND = pick(noctalia.background, noctalia.surface),
+    ACCENT     = pick(shell.accent, shell.secondary, shell.primary),
+    TERTIARY   = pick(shell.tertiary, shell.secondary, shell.primary),
+    BACKGROUND = pick(shell.background, shell.surface),
 
     -- Legacy Cachy aliases so older configs don't break
-    CACHYLGREEN = noctalia.primary,
-    CACHYMGREEN = noctalia.secondary,
-    CACHYDGREEN = pick(noctalia.tertiary, noctalia.secondary, noctalia.primary),
-    CACHYLBLUE  = pick(noctalia.accent, noctalia.secondary, noctalia.primary),
-    CACHYGRAY   = noctalia.surface,
+    CACHYLGREEN = shell.primary,
+    CACHYMGREEN = shell.secondary,
+    CACHYDGREEN = pick(shell.tertiary, shell.secondary, shell.primary),
+    CACHYLBLUE  = pick(shell.accent, shell.secondary, shell.primary),
+    CACHYGRAY   = shell.surface,
 }
 
 -- Loud failure beats a silently collapsed gradient.
 for _, key in ipairs({ "PRIMARY", "SECONDARY", "SURFACE", "ACCENT" }) do
     if not colors[key] then
-        print("[Hyprland] WARNING: colors." .. key .. " is nil -- check noctalia.lua")
+        print("[Hyprland] WARNING: colors." .. key .. " is nil -- check " .. SHELL_THEME_MODULE .. ".lua")
     end
 end
 

@@ -2,7 +2,7 @@
 
 -- Beziers
 hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
-hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
+hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } }) -- unused; slow in and out, kept as an option
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
 hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
@@ -14,8 +14,8 @@ hl.curve("snap",           { type = "bezier", points = { {0.2, 1},     {0.3, 1} 
 hl.curve("easeInQuad",     { type = "bezier", points = { {0.11, 0},    {0.5, 0}     } })
 
 -- Springs
-hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
-hl.curve("rubber",         { type = "spring", mass = 1, stiffness = 70,      dampening = 10         })
+hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 }) -- unused
+hl.curve("rubber",         { type = "spring", mass = 1, stiffness = 70,      dampening = 10         }) -- unused; bouncier than `easy`
 
 -- ── Animations ───────────────────────────────────────────────────────────
 

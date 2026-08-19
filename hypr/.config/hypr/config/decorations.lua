@@ -33,7 +33,6 @@ hl.config({
         dim_inactive = true,
         dim_strength = 0.10,
         dim_special = 0.4,
-        dim_around = 0.4,
 
         blur = {
             enabled = true,

@@ -1,4 +1,7 @@
-local noctalia_colors = require("noctalia").colors
+-- Route through config.colors like every other module, NOT through the shell
+-- module directly -- config/colors.lua is what makes a shell swap a one-file
+-- edit instead of a grep. This was the last hardcoded `require("noctalia")`.
+local colors = require("config.colors")
 
 hl.config({
     render = {
@@ -9,7 +12,7 @@ hl.config({
     },
     misc = {
         col = {
-            splash = noctalia_colors.primary,
+            splash = colors.PRIMARY,
         },
         middle_click_paste = false,
         enable_swallow = true,
