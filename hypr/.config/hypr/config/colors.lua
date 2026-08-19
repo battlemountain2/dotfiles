@@ -9,7 +9,26 @@
 -- SHELL_THEME_MODULE, not a literal "noctalia": this file is the one place
 -- that knows which shell generates the palette, and variables.lua is the one
 -- place that names it. Between them, a shell swap touches no other file.
-local shell = require(SHELL_THEME_MODULE).colors
+--
+-- Noctalia generating a Lua module is unusual -- most shells don't. So the
+-- require is guarded and falls back to a static palette. Without this, running
+-- no shell at all (or one that emits no Lua module) takes the WHOLE config
+-- down, because decorations, borders and misc all read from here.
+local FALLBACK = {
+    primary   = "rgb(80d5d0)",
+    secondary = "rgb(b0ccc9)",
+    surface   = "rgb(0e1514)",
+    error     = "rgb(ffb4ab)",
+}
+
+local ok, mod = pcall(require, SHELL_THEME_MODULE)
+local from_shell = ok and type(mod) == "table" and type(mod.colors) == "table"
+local shell = from_shell and mod.colors or FALLBACK
+
+if not from_shell then
+    print("[Hyprland] palette module '" .. tostring(SHELL_THEME_MODULE)
+          .. "' unavailable -- using fallback colours from config/colors.lua")
+end
 
 -- First non-nil argument wins. This cannot use ipairs({...}), which stops at
 -- the first nil and would defeat the entire point.
@@ -44,7 +63,7 @@ local colors = {
 -- Loud failure beats a silently collapsed gradient.
 for _, key in ipairs({ "PRIMARY", "SECONDARY", "SURFACE", "ACCENT" }) do
     if not colors[key] then
-        print("[Hyprland] WARNING: colors." .. key .. " is nil -- check " .. SHELL_THEME_MODULE .. ".lua")
+        print("[Hyprland] WARNING: colors." .. key .. " is nil -- check " .. tostring(SHELL_THEME_MODULE) .. ".lua")
     end
 end
 

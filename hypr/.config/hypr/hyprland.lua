@@ -69,9 +69,16 @@ require("config.workspaces")
 pcall(require, "optional.plugins")
 
 -- MANAGED BY NOCTALIA. Its Hyprland template re-adds this line if it goes
--- missing, so deleting it is pointless. Verified 2026-08 that it only ensures
--- the line exists -- it does not rewrite what follows, which is what makes the
--- block below work.
+-- missing, so deleting it is pointless while Noctalia is installed. Verified
+-- 2026-08 that it only ensures the line exists -- it does not rewrite what
+-- follows, which is what makes the block below work.
+--
+-- DROPPING NOCTALIA: this is the one hard dependency left in the config. It is
+-- a bare require, and it sits ABOVE config.borders, so if noctalia.lua is gone
+-- this throws and borders never apply. config/colors.lua falls back to a static
+-- palette on its own, but this line does not -- delete it by hand when you
+-- actually migrate. Deliberately not wrapped in pcall here: altering the text
+-- risks Noctalia no longer recognising its own line and appending a second.
 require("noctalia").apply_theme()
 
 -- ---------------------------------------------------------------------------
