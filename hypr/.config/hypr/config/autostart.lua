@@ -12,6 +12,11 @@ hl.exec_cmd("wl-paste --type image --watch cliphist store")
 
 hl.exec_cmd(SHELL_CMD)
 
+-- Trims Noctalia's bar to "1 .. (highest used) + 1". Self-managing (pidfile,
+-- no pkill); default without it is all 9 persistent (config/workspaces.lua).
+-- Disable: scripts/dynamic-workspaces.sh off
+hl.exec_cmd("\"$HOME/.config/hypr/scripts/dynamic-workspaces.sh\"")
+
 -- kded6 is kept for plasma_accentcolor_service (writes accent into kdeglobals).
 -- Its Plasma-shell-specific modules are disabled in ~/.config/kded6rc, which is
 -- global — a Plasma session inherits it and will come up without a system tray,
