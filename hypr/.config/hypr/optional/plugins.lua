@@ -13,7 +13,7 @@ local mainMod = "SUPER"
 local has_hyprtasking = hl.plugin and hl.plugin.hyprtasking
 
 if has_hyprtasking then
-    print("[Hyprland] hyprtasking detected: loading settings and binds")
+   -- print("[Hyprland] hyprtasking detected: loading settings and binds")
 
     hl.config({
         plugin = {

@@ -50,7 +50,7 @@ hl.animation({ leaf = "border", enabled = true, speed = 4, bezier = "almostLinea
 -- COST: `loop` means continuous repaint of every window border, forever.
 -- On a 240Hz panel that is real, measurable GPU time even when idle. Set
 -- enabled = false if you notice it, or raise speed to slow the rotation.
-hl.animation({ leaf = "borderangle", enabled = true, speed = 100, bezier = "linear", style = "loop" })
+hl.animation({ leaf = "borderangle", enabled = false, speed = 100, bezier = "linear", style = "loop" })
 
 -- Workspaces: 5ds is ~half a second, which fights hyprtasking's own
 -- overview timing. 4 is the compromise -- readable, still ahead of the

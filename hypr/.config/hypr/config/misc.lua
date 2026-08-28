@@ -9,6 +9,9 @@ hl.config({
     },
     dwindle = {
         preserve_split = true,
+        -- New windows always land on the right/bottom of the split
+        -- (0 = follow cursor, 1 = left/top, 2 = right/bottom).
+        force_split = 2,
     },
     misc = {
         col = {

@@ -68,6 +68,10 @@ require("config.windowrules")
 require("config.workspaces")
 pcall(require, "optional.plugins")
 
+
+--Hyprmod--
+require("hyprland-gui")
+
 -- MANAGED BY NOCTALIA. Its Hyprland template re-adds this line if it goes
 -- missing, so deleting it is pointless while Noctalia is installed. Verified
 -- 2026-08 that it only ensures the line exists -- it does not rewrite what
