@@ -1,0 +1,116 @@
+{
+  "bar": {
+    "centerAnchor": "omarchy.clock",
+    "layout": {
+      "center": [
+        {
+          "id": "omarchy.keyboard-layout"
+        },
+        {
+          "id": "omarchy.indicators"
+        },
+        {
+          "id": "tmn73.calendar",
+          "format": "dddd h:mm AP",
+          "showWorkingLocation": false,
+          "showYearProgress": true
+        },
+        {
+          "id": "omarchy.weather"
+        },
+        {
+          "id": "omarchy.system-update"
+        },
+        {
+          "id": "stappmus.lyrics"
+        },
+        {
+          "id": "quickshell.spotify",
+          "deviceName": "Omarchy Spotify",
+          "idleShutdownMinutes": 15,
+          "showMiniPlayer": "On",
+          "shortcutPlayer": "Omarchy Music app",
+          "showTrackTitle": "On",
+          "showArtistName": "Off",
+          "scrollBarText": "Off",
+          "scrollSpeed": "1",
+          "audioQuality": "320 kbps",
+          "searchHistory": "[]"
+        }
+      ],
+      "left": [
+        {
+          "id": "omarchy.menu"
+        },
+        {
+          "id": "omarchy.workspaces"
+        }
+      ],
+      "right": [
+        {
+          "id": "omarchy.tray"
+        },
+        {
+          "id": "io.github.smillunchick.aether-wallpapers"
+        },
+        {
+          "id": "io.github.peterszarvas94.plugin-manager"
+        },
+        {
+          "id": "omarchy.agents"
+        },
+        {
+          "id": "shavanced.notification-center"
+        },
+        {
+          "id": "io.github.vuhuy.clipboard-manager"
+        },
+        {
+          "id": "omarchy.bluetooth"
+        },
+        {
+          "id": "omarchy.microphone"
+        },
+        {
+          "id": "omarchy.audio"
+        },
+        {
+          "id": "omarchy.monitor"
+        },
+        {
+          "id": "omarchy.power",
+          "showPercentage": false
+        },
+        {
+          "id": "omarchy.network"
+        }
+      ]
+    },
+    "position": "top",
+    "transparent": false
+  },
+  "disabledPlugins": [
+    "omarchy.clipboard",
+    "omarchy.lock"
+  ],
+  "idle": {
+    "lock": 300,
+    "screensaver": 150
+  },
+  "plugins": [
+    {
+      "id": "mirador"
+    },
+    {
+      "id": "bobbynicholas.omaland"
+    },
+    {
+      "id": "io.github.sirjul1337.lock-explorer",
+      "design": "my-cinema"
+    }
+  ],
+  "version": 1,
+  "cloneSourceRestores": [
+    "io.github.sirjul1337.lock-explorer"
+  ]
+}

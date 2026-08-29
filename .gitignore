@@ -1,3 +1,11 @@
 *.bak
 *.bak2
 _to_delete/
+
+# Machine-local state and credentials
+calendar-sync.json
+**/credentials*
+**/tokens*
+**/cookies*
+**/session-state*
+**/.git/
