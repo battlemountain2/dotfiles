@@ -10,19 +10,16 @@
           "id": "omarchy.indicators"
         },
         {
-          "id": "tmn73.calendar",
           "format": "dddd h:mm AP",
+          "id": "tmn73.calendar",
           "showWorkingLocation": false,
           "showYearProgress": true
-        },
-        {
-          "id": "omarchy.weather"
         },
         {
           "id": "omarchy.system-update"
         },
         {
-          "id": "stappmus.lyrics"
+          "id": "omarchy.weather"
         },
         {
           "id": "quickshell.spotify",
@@ -40,33 +37,32 @@
       ],
       "left": [
         {
-          "id": "omarchy.menu"
-        },
-        {
           "id": "omarchy.workspaces"
         }
       ],
       "right": [
         {
-          "id": "omarchy.tray"
+          "id": "so.den",
+          "widgets": [
+            "omarchy.agents",
+            "omarchy.bluetooth",
+            "io.github.vuhuy.clipboard-manager",
+            "omarchy.monitor",
+            "io.github.peterszarvas94.plugin-manager",
+            "omarchy.tray",
+            "krall.switchboard"
+          ],
+          "popupMaxHeight": 334,
+          "popupMaxWidth": 196
         },
         {
-          "id": "io.github.smillunchick.aether-wallpapers"
+          "id": "io.github.haydenmckay.media-pip"
         },
         {
-          "id": "io.github.peterszarvas94.plugin-manager"
-        },
-        {
-          "id": "omarchy.agents"
+          "id": "io.weirdware.blueferry"
         },
         {
           "id": "shavanced.notification-center"
-        },
-        {
-          "id": "io.github.vuhuy.clipboard-manager"
-        },
-        {
-          "id": "omarchy.bluetooth"
         },
         {
           "id": "omarchy.microphone"
@@ -75,7 +71,7 @@
           "id": "omarchy.audio"
         },
         {
-          "id": "omarchy.monitor"
+          "id": "bry.control-center"
         },
         {
           "id": "omarchy.power",
@@ -89,9 +85,14 @@
     "position": "top",
     "transparent": false
   },
+  "cloneSourceRestores": [
+    "io.github.sirjul1337.lock-explorer",
+    "krall.switchboard"
+  ],
   "disabledPlugins": [
     "omarchy.clipboard",
-    "omarchy.lock"
+    "omarchy.lock",
+    "omarchy.menu"
   ],
   "idle": {
     "lock": 300,
@@ -105,12 +106,37 @@
       "id": "bobbynicholas.omaland"
     },
     {
-      "id": "io.github.sirjul1337.lock-explorer",
-      "design": "my-cinema"
+      "design": "my-cinema",
+      "id": "io.github.sirjul1337.lock-explorer"
+    },
+    {
+      "id": "iaeluk.omenu"
+    },
+    {
+      "id": "omarchy.agents"
+    },
+    {
+      "id": "omarchy.bluetooth"
+    },
+    {
+      "id": "io.github.vuhuy.clipboard-manager"
+    },
+    {
+      "id": "omarchy.monitor"
+    },
+    {
+      "id": "io.github.peterszarvas94.plugin-manager"
+    },
+    {
+      "id": "omarchy.tray",
+      "pinned": [],
+      "hidden": [
+        "Antigravity_status_icon_1"
+      ]
+    },
+    {
+      "id": "krall.switchboard"
     }
   ],
-  "version": 1,
-  "cloneSourceRestores": [
-    "io.github.sirjul1337.lock-explorer"
-  ]
+  "version": 1
 }

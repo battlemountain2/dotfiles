@@ -40,7 +40,7 @@ o.bind("SUPER + RETURN", "Browser", { omarchy = "browser" })
 --   SUPER+E  file manager (Omarchy's own is SUPER+SHIFT+F, still works)
 --   SUPER+B  browser      (Omarchy's own is SUPER+SHIFT+B, still works)
 --   CTRL+SHIFT+ESCAPE  task-manager reflex, opens btop
-o.bind("SUPER + E", "File manager", { omarchy = "nautilus" })
+o.bind("SUPER + E", "File manager", "dolphin")
 o.bind("SUPER + B", "Browser", { omarchy = "browser" })
 o.bind("CTRL + SHIFT + ESCAPE", "System monitor", { tui = "btop" })
 
@@ -54,6 +54,8 @@ o.bind("CTRL + SHIFT + ESCAPE", "System monitor", { tui = "btop" })
 --   grep -n "Close window" /usr/share/omarchy/default/hypr/bindings/tiling.lua
 -- and replace hl.dsp.window.close() with whatever they actually use.
 o.bind("SUPER + Q", "Quit window", hl.dsp.window.close())
+hl.unbind("SUPER + P")
+o.bind("SUPER + P", "Pin window", hl.dsp.window.pin())
 
 -- ---------------------------------------------------------------------------
 -- Workspaces on SUPER + ALT (Command + Option)
@@ -130,3 +132,16 @@ end
 o.bind("SUPER + SHIFT + code:12", "Screenshot display",   "omarchy-capture-screenshot fullscreen")
 o.bind("SUPER + SHIFT + code:13", "Screenshot selection", "omarchy-capture-screenshot")
 o.bind("SUPER + SHIFT + code:14", "Capture menu",         "omarchy-menu toggle capture")
+
+-- ---------------------------------------------------------------------------
+-- Control Center
+-- ---------------------------------------------------------------------------
+o.bind("SUPER + BACKSLASH", "Control Center", "omarchy-shell shell toggle bry.control-center")
+
+-- ---------------------------------------------------------------------------
+-- Lid Open / Wake
+-- ---------------------------------------------------------------------------
+-- On lid open, restore clamshell and refresh WirePlumber so suspended USB audio
+-- devices don't leave PipeWire in an error loop that stalls browser video playback.
+o.bind("switch:off:Lid Switch", nil, "bash -c 'omarchy-hyprland-monitor-clamshell; systemctl --user restart wireplumber'", { locked = true })
+

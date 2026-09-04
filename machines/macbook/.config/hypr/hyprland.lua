@@ -27,6 +27,7 @@ require("default.hypr.toggles")
 
 -- Add any other personal Hyprland configuration below.
 -- o.window("qemu", { workspace = "5" })
+hl.env("QT_QPA_PLATFORMTHEME", "kde")
 
 -- ---------------------------------------------------------------------------
 -- Window rules ported from ~/dotfiles (CachyOS rig)
@@ -42,12 +43,22 @@ require("default.hypr.toggles")
 -- ---------------------------------------------------------------------------
 
 -- Picture-in-Picture: float, pin above everything, keep aspect, corner-sized.
--- Worth having on a laptop -- YouTube/video PiP while working.
+-- Inhibit idle so video playback doesn't sleep while watching.
 o.window({ title = "^([Pp]icture[-\\s]?[Ii]n[-\\s]?[Pp]icture)(.*)$" }, {
   float = true,
   pin = true,
   keep_aspect_ratio = true,
+  idle_inhibit = "always",
   size = { "max(monitor_w, monitor_h)*0.25", "min(monitor_w, monitor_h)*0.25" },
+})
+
+-- Prevent screen sleep/screensaver when watching videos:
+-- 1. Any fullscreen browser session (movies, fullscreen YouTube/Twitch, etc.)
+o.window("^(zen|firefox|[cC]hrom(e|ium)|brave-browser)$", { idle_inhibit = "fullscreen" })
+
+-- 2. When media sites (YouTube, Twitch, Netflix, etc.) are active in Zen or Firefox
+o.window({ class = "^(zen|firefox)$", title = ".*([Yy]ou[Tt]ube|[Tt]witch|[Nn]etflix|[Kk]ick|[Vv]imeo).*" }, {
+  idle_inhibit = "always",
 })
 
 -- Any floating window opens centered.
@@ -57,13 +68,29 @@ o.window({ float = true }, { center = true })
 -- tiled window owns the workspace (nothing to distinguish it from).
 o.window({ float = false, workspace = "w[tv1]s[false]" }, { border_size = 0 })
 
--- File manager floats by default. Centered and sized explicitly rather than
--- relying on the generic float-centering rule above, so this works regardless
--- of rule evaluation order.
+-- File managers and file dialogs float centered with matching size
+local fileWindowSize = { "min(monitor_w*0.65, 1280)", "min(monitor_h*0.75, 850)" }
+
 o.window("^(org\\.gnome\\.Nautilus)$", {
   float = true,
   center = true,
-  size = { "min(monitor_w*0.6, 1200)", "min(monitor_h*0.7, 800)" },
+  size = fileWindowSize,
+})
+
+o.window({
+  class = "^(org\\.kde\\.dolphin)$",
+  title = "negative:^(Moving.*|Create New.*|Extract.*|Compress.*|Copying.*|Progress.*|Configure.*|Properties.*|Choose\\sApplication.*)$",
+}, {
+  float = true,
+  center = true,
+  size = fileWindowSize,
+})
+
+-- Portal file pickers (KDE and GTK backends)
+o.window("^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*|[Xx]dg-[Dd]esktop-[Pp]ortal.*)$", {
+  float = true,
+  center = true,
+  size = fileWindowSize,
 })
 
 -- Steam (incl. Big Picture) always opens on workspace 5. Desktop UI and Big
