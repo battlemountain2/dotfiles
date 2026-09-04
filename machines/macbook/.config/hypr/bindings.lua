@@ -56,6 +56,12 @@ o.bind("CTRL + SHIFT + ESCAPE", "System monitor", { tui = "btop" })
 o.bind("SUPER + Q", "Quit window", hl.dsp.window.close())
 hl.unbind("SUPER + P")
 o.bind("SUPER + P", "Pin window", hl.dsp.window.pin())
+hl.unbind("SUPER + F")
+o.bind("SUPER + F", "Toggle window floating/tiling", hl.dsp.window.float({ action = "toggle" }))
+hl.unbind("SUPER + W")
+o.bind("SUPER + W", "Maximize window", hl.dsp.window.fullscreen({ mode = "maximized" }))
+hl.unbind("SUPER + SHIFT + W")
+o.bind("SUPER + SHIFT + W", "Full screen", hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 
 -- ---------------------------------------------------------------------------
 -- Workspaces on SUPER + ALT (Command + Option)
@@ -91,7 +97,6 @@ for workspace = 1, 10 do
   -- ---------------------------------------------------------------------------
   -- Left alone deliberately
   -- ---------------------------------------------------------------------------
-  -- SUPER+W (close), SUPER+F (fullscreen): already match macOS muscle memory.
   -- The whole XF86 media row: Omarchy's handling is thorough and hardware-keyed.
   -- SUPER+SHIFT+n move-to-workspace, SUPER+TAB cycling, scratchpad, groups.
   --

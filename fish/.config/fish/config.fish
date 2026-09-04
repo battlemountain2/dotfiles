@@ -34,7 +34,6 @@ set -gx EDITOR "kate -b"
 # function is just parsing; it costs effectively nothing at startup.
 
 function fish_greeting
-    type -q fastfetch; and fastfetch
 end
 
 function backup -a filename -d "Copy FILE to FILE.bak"
