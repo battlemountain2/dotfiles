@@ -21,9 +21,12 @@ hl.bind(mainMod .. " + Q", function()
         hl.dispatch(hl.dsp.exec_cmd("hyprctl dispatch killactive"))
     end
 end)
+hl.bind(mainMod .. " + F",           hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + ALT + Space", hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + W",           hl.dsp.window.fullscreen({ mode = 1 }))
-hl.bind(mainMod .. " + F",           hl.dsp.window.fullscreen())
+pcall(hl.unbind, mainMod .. " + W")
+hl.bind(mainMod .. " + W",           hl.dsp.window.fullscreen({ mode = "maximized" }))
+pcall(hl.unbind, mainMod .. " + SHIFT + W")
+hl.bind(mainMod .. " + SHIFT + W",   hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(mainMod .. " + J",           hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + P",           hl.dsp.window.pin())
 
@@ -117,7 +120,7 @@ hl.bind("Print",                 hl.dsp.exec_cmd(noctCall .. "screenshot-region"
 hl.bind(mainMod .. " + Print",   hl.dsp.exec_cmd(noctCall .. "screenshot-fullscreen"))
 
 -- Theming and Wallpaper
-hl.bind(mainMod .. " + SHIFT + W", hl.dsp.exec_cmd(noctCall .. "panel-toggle wallpaper"))
+hl.bind(mainMod .. " + ALT + W", hl.dsp.exec_cmd(noctCall .. "panel-toggle wallpaper"))
 
 -- Clipboard
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(noctCall .. "panel-toggle clipboard"))
@@ -129,7 +132,6 @@ hl.bind(mainMod .. " + ALT + K", hl.dsp.exec_cmd("/home/bry/.local/bin/autoclick
 ---- TV / AV ----
 -----------------
 
-hl.bind("CONTROL + ALT + C", hl.dsp.exec_cmd("fish -c 'tv app com.limelight'"))
 hl.bind("CONTROL + ALT + T", hl.dsp.exec_cmd("fish -c 'tv on'"))
 
 -------------------------------

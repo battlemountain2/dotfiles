@@ -1,70 +1,50 @@
--- /home/bry/.config/optional/plugins.lua
+-- /home/bry/.config/hypr/optional/plugins.lua
 --
--- hyprtasking only. Everything else stripped.
---
--- Compatibility note: hyprpm.toml pins go up to v0.56.1; you're on 0.56.2,
--- so there's no pin for you and hyprpm will build main HEAD against your
--- headers. That may or may not carry the workspace-state API fix. The
--- guard below means a failed load just skips this block rather than
--- throwing "Invalid dispatcher" on every startup.
+-- HyprExpo+ (sandwichfarm/hyprexpo) configuration & keybinds.
 
+local colors = require("config.colors")
 local mainMod = "SUPER"
 
-local has_hyprtasking = hl.plugin and hl.plugin.hyprtasking
+hl.config({
+    plugin = {
+        hyprexpo = {
+            columns = 3,
+            gaps_in = 6,
+            gaps_out = 12,
+            bg_col = "rgb(111111)",
+            workspace_method = "center current",
+            cancel_key = "escape",
+            show_cursor = 1,
+            drag_drop_enable = 1,
+            keynav_enable = 1,
+            number_key_mode = "workspace",
+            keynav_wrap_h = 1,
+            keynav_wrap_v = 1,
 
-if has_hyprtasking then
-   -- print("[Hyprland] hyprtasking detected: loading settings and binds")
+            -- Borders: follow Noctalia theme primary color for active/focused tile, black for inactive
+            border_width = 2,
+            border_color = "rgb(000000)",
+            border_color_current = colors.PRIMARY,
+            border_color_focus = colors.PRIMARY,
+            border_color_hover = colors.ACCENT,
 
-    hl.config({
-        plugin = {
-            hyprtasking = {
-                layout = "grid",
+            -- Hide workspace numbers / labels
+            label_enable = 0,
+            show_workspace_numbers = 0,
+            show_workspace_names = 0,
+            selection_label_enable = 0,
 
-                gap_size = 10,
-                bg_color = 0xff1a1a1a,
-                border_size = 2,
-                exit_on_hovered = false,
-                warp_on_move_window = 1,
-                close_overview_on_reload = false,
+            -- Rounded tile corners matching desktop aesthetic
+            tile_rounding = 10,
+        },
+    },
+})
 
-                drag_button = 0x110,   -- left mouse: drag windows between workspaces
-                select_button = 0x111, -- right mouse: jump to workspace
-
-                gestures = {
-                    -- Touchpad only. Off on a desktop.
-                    enabled = false,
-                },
-
-                grid = {
-                    rows = 3,
-                    cols = 3,
-                    loop = false,
-                    layers = 1,          -- 3x3x1 = 9, matching your workspace count
-                    loop_layers = true,
-                    gaps_use_aspect_ratio = true,
-                },
-            }
-        }
-    })
-
-    -- SUPER+Tab: this monitor. SUPER+SHIFT+Tab: everything.
-    -- Deliberately avoiding the README's SUPER+Space and SUPER+X examples —
-    -- those are your Noctalia launcher and control-center.
-    hl.bind(mainMod .. " + Tab", function()
-    hl.plugin.hyprtasking.toggle("cursor")
-    end)
-
-    hl.bind(mainMod .. " + SHIFT + Tab", function()
-    hl.plugin.hyprtasking.toggle("all")
-    end)
-
-    -- Escape closes the overview only when it's open. non_consuming means
-    -- Escape still reaches applications the rest of the time.
-    hl.bind("escape", function()
-    if hl.plugin.hyprtasking.is_active() then
-        hl.plugin.hyprtasking.toggle("all")
-        end
-        end, { non_consuming = true })
+-- Super + Tab toggles the workspace overview
+hl.bind(mainMod .. " + Tab", function()
+    if hl.plugin and hl.plugin.hyprexpo then
+        hl.plugin.hyprexpo.expo("toggle")
     else
-        print("[Hyprland] hyprtasking not detected: skipping plugin config")
-        end
+        hl.dispatch("hyprexpo:expo", "toggle")
+    end
+end)

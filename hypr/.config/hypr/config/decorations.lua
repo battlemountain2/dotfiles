@@ -86,3 +86,13 @@ hl.layer_rule({
     -- windows which should only see the wallpaper.
     xray = false,
 })
+
+hl.layer_rule({
+    name = "shell-panels",
+    match = {
+        namespace = "^noctalia-.*panel$",
+    },
+    blur = true,
+    blur_popups = true,
+    ignore_alpha = 0.1,
+})

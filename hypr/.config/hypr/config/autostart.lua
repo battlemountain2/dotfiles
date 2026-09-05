@@ -1,7 +1,8 @@
 -- Auto-start config
 hl.on("hyprland.start", function ()
-hl.exec_cmd("hyprpm reload -n && hyprctl reload")
+hl.exec_cmd("hyprctl plugin load /home/bry/.config/hypr/plugins/hyprexpo.so")
 hl.exec_cmd("dbus-update-activation-environment --systemd --all")
+hl.exec_cmd("systemctl --user import-environment HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY && systemctl --user restart xdg-desktop-portal-hyprland")
 hl.exec_cmd("systemctl --user start gpu-screen-recorder-ui")
 hl.exec_cmd("systemctl --user start plasma-polkit-agent")
 hl.exec_cmd("/usr/lib/kdeconnectd")

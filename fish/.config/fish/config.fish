@@ -24,9 +24,11 @@ if type -q bat
     set -gx MANPAGER "sh -c 'col -bx | bat -l man -p'"
 end
 
-# kate needs -b (--block), or it forks immediately and git sees an unchanged
+# zeditor needs --wait, or it forks immediately and git sees an unchanged
 # message file and aborts the commit. Matches EDITOR in hypr variables.lua.
-set -gx EDITOR "kate -b"
+set -gx EDITOR "zeditor --wait"
+set -gx VISUAL "zeditor --wait"
+alias zed zeditor
 
 # ─── Functions ────────────────────────────────────────────────────────────
 #

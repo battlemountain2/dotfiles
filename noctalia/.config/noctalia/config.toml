@@ -2,45 +2,60 @@
 ui_scale = 1.15
 
 [bar.default]
+position = "top"
+thickness = 38
+scale = 1.05
+margin_edge = 6
+margin_ends = 14
+radius_top_left = 16
+radius_top_right = 16
+radius_bottom_left = 0
+radius_bottom_right = 0
+background_opacity = 0.0
+capsule_opacity = 0.70
+shadow = false
+hover_highlight = true
 auto_hide = false
-smart_auto_hide = true
-reserve_space = false
-center = [ "workspaces", "spacer_1", "active_window" ]
-concave_edge_corners = true
-end = [ "media", "spacer_1", "tray", "notifications", "network", "volume", "session" ]
+smart_auto_hide = false
+reserve_space = true
 layer = "overlay"
-margin_edge = 0
-margin_ends = 0
-radius_bottom_left = 12
-radius_bottom_right = 12
-radius_top_left = 0
-radius_top_right = 0
-scale = 1.10
-start = [ "launcher", "clock", "spacer_1", "group:g1" ]
-thickness = 35
+
+start = [ "workspaces", "media" ]
+center = [ "group:g_center" ]
+end = [ "privacy", "tray", "group:g_right" ]
 
     [[bar.default.capsule_group]]
-    border = ""
+    id = "g_center"
+    members = [ "weather", "clock", "nightlight" ]
     fill = "on_secondary"
-    id = "g1"
-    members = [ "temp", "sysmon_2", "sysmon_3" ]
-    opacity = 1.0
+    opacity = 0.70
     padding = 6.0
 
+    [[bar.default.capsule_group]]
+    id = "g_right"
+    members = [ "volume", "network", "notifications", "brightness" ]
+    fill = "on_secondary"
+    opacity = 0.70
+    padding = 6.0
+
+[dock]
+enabled = true
+background_opacity = 0.70
+launcher_icon = "rocket"
+launcher_position = "start"
+reserve_space = false
+show_dots = true
+smart_auto_hide = true
+
 [idle]
-# Fade the screen for this long before an idle action fires.
 pre_action_fade_seconds = 2.0
 
-    # Desktop machine: blank the display, but don't auto-lock.
-    # SUPER + L still locks on demand (noctalia msg session lock).
     [idle.behavior.screen-off]
     timeout = 900
     command = "noctalia:dpms-off"
     resume_command = "noctalia:dpms-on"
     enabled = true
 
-    # Left here deliberately, switched off, so it's obvious this is a
-    # choice rather than an oversight. Flip enabled to true to auto-lock.
     [idle.behavior.lock]
     timeout = 1800
     command = "noctalia:session lock"
@@ -53,9 +68,13 @@ polkit_agent = false
 settings_show_advanced = true
 
     [shell.panel]
+    control_center_placement = "floating"
+    control_center_position = "auto"
     open_near_click_control_center = true
     session_placement = "floating"
     session_position = "center"
+    floating_offset = 8
+    transparency_mode = "solid"
 
     [shell.screenshot]
     copy_to_clipboard = true
@@ -109,57 +128,53 @@ wallpaper_scheme = "m3-tonal-spot"
     [theme.templates]
     builtin_ids = [ "btop", "gtk3", "gtk4", "kcolorscheme", "kitty", "qt", "alacritty" ]
 
-[widget.clock]
-color = "secondary"
-format = "{:%H:%M %A %m/%d/%y}"
-
-[widget.launcher]
-color = "secondary"
+[widget.workspaces]
+style = "focus_hint"
+show_icons = true
+labels_only_when_occupied = true
+hide_when_empty = true
+show_labels = false
+active_pill_size = 2.2
+inactive_pill_size = 1.0
+pill_scale = 0.85
+capsule = true
+capsule_fill = "on_secondary"
 
 [widget.media]
 hide_when_no_media = true
 title_scroll = "on_hover"
+show_progress = true
+capsule = true
+capsule_fill = "on_secondary"
 
-[widget.network]
+[widget.clock]
 color = "secondary"
+format = "{:%I:%M %p • %a, %b %d}"
 
-[widget.notifications]
+[widget.weather]
 color = "secondary"
+show_temperature = true
+show_condition = false
 
-[widget.session]
-color = "error"
-
-[widget.spacer_1]
-type = "spacer"
-
-[widget.temp]
-type = "sysmon"      
-stat = "cpu_temp"
-show_value = false    
-
-[widget.sysmon_2]
-glyph = "gpu-usage"
-show_value = false
-stat = "gpu_temp"
-type = "sysmon"
-
-[widget.sysmon_3]
-glyph = "cpu-2"
-stat = "ram_used"
-type = "sysmon"
+[widget.privacy]
+capsule = true
+capsule_fill = "on_secondary"
 
 [widget.tray]
 capsule = true
 capsule_fill = "on_secondary"
 
-[widget.volume]
-color = "secondary"
+[widget.nightlight]
 
-[widget.workspaces]
-show_labels = false   # was display = "none"
-label_source = "id"
-active_pill_size = 2.5
+[widget.brightness]
+
+[widget.volume]
+
+[widget.network]
+
+[widget.notifications]
+
+[widget.session]
+color = "error"
 capsule = true
-capsule_fill = "on_primary"
-inactive_pill_size = 1.0
-pill_scale = 0.80
+capsule_fill = "on_secondary"

@@ -3,7 +3,7 @@
 TERMINAL     = "kitty"
 FILE_MANAGER = "dolphin"
 BROWSER      = "zen-browser"
-EDITOR       = "kate"
+EDITOR       = "zeditor"
 CALCULATOR   = "gnome-calculator"
 
 -- Desktop shell
@@ -19,7 +19,7 @@ CALCULATOR   = "gnome-calculator"
 SHELL_CMD          = "noctalia"
 SHELL_IPC          = SHELL_CMD .. " msg "
 SHELL_THEME_MODULE = "noctalia"
-SHELL_LAYER        = "^noctalia-(bar-.+|notification|dock|panel|attached-panel|osd|window-switcher)$"
+SHELL_LAYER        = "^noctalia-bar-.+$"
 
 -- Monitors
 -- Actual mode/scale/HDR lives in optional/monitors-<hostname>.lua, falling

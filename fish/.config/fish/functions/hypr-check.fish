@@ -20,7 +20,7 @@ function hypr-check --description 'Post-update sanity check: Hyprland, borders, 
     set_color --bold; echo "Hyprland"; set_color normal
 
     # --- config parses without errors ---
-    set -l errs (hyprctl configerrors 2>&1 | string trim)
+    set -l errs (hyprctl configerrors 2>&1 | string match -r '\S.*')
     if test -z "$errs"
         __hypr_check_line ok "config loads with no errors"
     else
@@ -49,10 +49,10 @@ function hypr-check --description 'Post-update sanity check: Hyprland, borders, 
     end
 
     # --- plugins are rebuilt against the current Hyprland ---
-    if hyprctl plugin list 2>/dev/null | string match -q -i '*hyprtasking*'
-        __hypr_check_line ok "hyprtasking loaded"
+    if hyprctl plugin list 2>/dev/null | string match -q -i '*hyprexpo*'
+        __hypr_check_line ok "hyprexpo loaded"
     else
-        __hypr_check_line warn "hyprtasking NOT loaded -- SUPER+Q is on the killactive fallback. Try: hyprpm update; and hyprpm reload"
+        __hypr_check_line warn "hyprexpo NOT loaded"
     end
 
     # --- monitor came up at the configured mode ---
