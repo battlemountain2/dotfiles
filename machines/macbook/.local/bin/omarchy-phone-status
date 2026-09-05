@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+# Quick helper to report connected iPhone/phone status in JSON
+
+found=false
+name="iPhone"
+battery=0
+
+# Check connected bluetooth devices
+while read -r _ mac dev_name; do
+    [[ -z "$mac" ]] && continue
+    info=$(bluetoothctl info "$mac" 2>/dev/null)
+    if echo "$info" | grep -q "Icon: phone" || echo "$info" | grep -q "Message Access Server"; then
+        found=true
+        parsed_name=$(echo "$info" | grep "^[[:space:]]*Name:" | head -n1 | sed 's/^[[:space:]]*Name:[[:space:]]*//')
+        [[ -n "$parsed_name" ]] && name="$parsed_name"
+        
+        # Check battery from bluetoothctl info
+        bat_val=$(echo "$info" | grep "Battery Percentage:" | head -n1 | grep -o '([0-9]\+)' | tr -d '()')
+        if [[ -n "$bat_val" ]]; then
+            battery=$bat_val
+        else
+            # Fallback to upower
+            upower_dev=$(upower -e 2>/dev/null | grep -i "phone_dev" | head -n1)
+            if [[ -n "$upower_dev" ]]; then
+                up_bat=$(upower -i "$upower_dev" 2>/dev/null | grep -i "percentage:" | awk '{print $2}' | tr -d '%')
+                [[ -n "$up_bat" ]] && battery=$up_bat
+            fi
+        fi
+        break
+    fi
+done < <(bluetoothctl devices Connected 2>/dev/null)
+
+if $found; then
+    printf '{"connected":true,"name":"%s","battery":%d}\n' "$name" "$battery"
+else
+    # Check if upower knows of any recent phone
+    upower_dev=$(upower -e 2>/dev/null | grep -i "phone_dev" | head -n1)
+    if [[ -n "$upower_dev" ]]; then
+        model=$(upower -i "$upower_dev" 2>/dev/null | grep -i "model:" | awk '{$1=""; print $0}' | sed 's/^[[:space:]]*//')
+        [[ -n "$model" ]] && name="$model"
+    fi
+    printf '{"connected":false,"name":"%s","battery":0}\n' "$name"
+fi

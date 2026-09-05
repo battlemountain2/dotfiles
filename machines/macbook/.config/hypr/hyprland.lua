@@ -97,3 +97,33 @@ o.window("^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*|[Xx]dg-[Dd]esktop-[
 -- Picture share class "steam", so this catches both; games launched from Steam
 -- have their own classes and are unaffected.
 o.window("^(steam)$", { workspace = "5" })
+
+-- Omacalc: sleek floating calculator
+o.window({ class = "^(omacalc)$" }, {
+  float = true,
+  center = true,
+  size = { 360, 520 },
+})
+
+-- Quake-style dropdown scratchpad
+o.window({ class = "^(scratchpad-notes)$" }, {
+  workspace = "special:scratchpad",
+  float = true,
+  center = true,
+  size = { "72%", "62%" },
+})
+
+-- Phone Bridge: Messages (BlueFerry) and AirDrop (LocalSend)
+o.window({ class = "^(blueferry-tui)$" }, {
+  float = true,
+  center = true,
+  size = { "58%", "68%" },
+})
+
+o.window({ class = "^(localsend.*)$" }, {
+  float = true,
+  center = true,
+  size = { 460, 680 },
+})
+
+

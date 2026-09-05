@@ -1,0 +1,12 @@
+[Unit]
+Description=LocalSend — AirDrop receiver daemon
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/localsend --hidden
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

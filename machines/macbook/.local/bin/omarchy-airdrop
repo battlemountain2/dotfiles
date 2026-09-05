@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# AirDrop / LocalSend summoner
+if [[ -n "$1" ]]; then
+    localsend "$@" &
+else
+    omarchy-launch-or-focus "localsend" "localsend"
+fi

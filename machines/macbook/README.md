@@ -16,13 +16,22 @@ material, and Spotify UI session state.
 ## Notable behavior
 
 - Retina scale 2
-- Natural touchpad scrolling
-- Three-finger horizontal workspace gestures
-- Three-finger Mirador overview gestures
-- Mac-style Command shortcuts and screenshots
-- MacBook keyboard-backlight bindings
+- Natural touchpad scrolling and 4-finger launcher swipe
+- Three-finger horizontal workspace gestures & Mirador overview
+- Mac-style Command shortcuts, screenshots, and floating window rules
+- MacBook keyboard-backlight bindings and dynamic brightness control
 - PiP, centered floating windows, smart borders, blur, shadows, and dimming
-- Omarchy Shell bar, plugins, lock design, and update/theme hooks
+- Omarchy Shell custom bar (`bry.bar`) and Control Center (`bry.control-center`)
+- Phone Wireless Bridge: LocalSend AirDrop daemon and BlueFerry iMessage/SMS hub
+- Student & classroom toolkit:
+  - Floating calculator (`Cmd + Option + C`, `omarchy-calc-toggle`)
+  - Dropdown scratchpad (`Cmd + N`, `omarchy-scratchpad`)
+  - Instant OCR grabber (`Cmd + Shift + O`, `omarchy-ocr`)
+  - Classroom presentation mode (`Cmd + Option + P`, `omarchy-presentation-mode`)
+  - Audio Guard auto-mute on headphone disconnect (`omarchy-audio-guard`)
+  - ProMotion 120Hz/60Hz rate switcher with 20% battery alert (`omarchy-display-rate`)
+  - Push-to-talk voice dictation (`Cmd + Shift + V`, `voxtype`)
+- Helper scripts in `.local/bin/` and user systemd daemons in `.config/systemd/user/`
 
 See [`omarchy-addons.md`](omarchy-addons.md) for reproducible plugin and theme
 sources rather than vendored third-party repositories.

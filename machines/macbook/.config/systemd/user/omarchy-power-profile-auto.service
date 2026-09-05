@@ -1,0 +1,12 @@
+[Unit]
+Description=Automatic Power Profile Switcher (AC vs Battery)
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/omarchy-power-profile-auto
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

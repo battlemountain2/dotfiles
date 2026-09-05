@@ -54,8 +54,8 @@ hl.config({
 })
 
 -- App-specific touchpad scroll speeds.
--- o.window("(Alacritty|kitty|foot)", { scroll_touchpad = 1.5 })
--- o.window("com.mitchellh.ghostty", { scroll_touchpad = 0.2 })
+-- Dial back browser kinetic scrolling so two-finger swipes feel precise, while leaving Kitty untouched.
+o.window("([zZ]en|[fF]irefox|((google-)?[cC]hrom(e|ium))|[bB]rave-browser)", { scroll_touchpad = 0.5 })
 
 -- Touchpad gestures.
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Gestures/
@@ -68,7 +68,5 @@ hl.gesture({ fingers = 3, direction = "horizontal", action = "workspace" })
 hl.gesture({ fingers = 3, direction = "up", action = function() hl.dispatch(hl.dsp.exec_cmd("omarchy-shell shell summon mirador '{}'")) end })
 hl.gesture({ fingers = 3, direction = "down", action = function() hl.dispatch(hl.dsp.exec_cmd("omarchy-shell shell hide mirador")) end })
 
--- Left alone: the commented focus-move gesture below is for the scrolling
--- layout (not in use here) and would conflict with "horizontal" above.
--- hl.gesture({ fingers = 3, direction = "left", action = function() hl.dispatch(hl.dsp.focus({ direction = "l" })) end })
--- hl.gesture({ fingers = 3, direction = "right", action = function() hl.dispatch(hl.dsp.focus({ direction = "r" })) end })
+-- 4-finger swipe up opens the Omarchy app launcher.
+hl.gesture({ fingers = 4, direction = "up", action = function() hl.dispatch(hl.dsp.exec_cmd("omarchy-menu toggle")) end })
