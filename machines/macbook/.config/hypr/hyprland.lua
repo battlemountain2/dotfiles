@@ -86,6 +86,12 @@ o.window({
   size = fileWindowSize,
 })
 
+o.window("^(org\\.kde\\.ark)$", {
+  float = true,
+  center = true,
+  size = fileWindowSize,
+})
+
 -- Portal file pickers (KDE and GTK backends)
 o.window("^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*|[Xx]dg-[Dd]esktop-[Pp]ortal.*)$", {
   float = true,
