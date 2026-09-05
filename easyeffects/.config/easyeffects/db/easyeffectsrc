@@ -1,0 +1,17 @@
+[EffectsPipelines]
+processAllOutputs=false
+
+[StreamInputs]
+inputDevice=alsa_input.usb-Blue_Microphones_Yeti_X_2114SG0067R8_888-000313110306-00.analog-stereo
+plugins=rnnoise#0,gate#0,equalizer#0,compressor#0,deesser#0
+visiblePage=pluginsPage
+visiblePlugin=gate#0
+
+[StreamOutputs]
+outputDevice=alsa_output.usb-FIIO_FiiO_K11_R2R-01.playback.0.0
+
+[Window]
+autostartOnLogin=true
+height=1380
+visiblePage=inputPage
+width=1264
