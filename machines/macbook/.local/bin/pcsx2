@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # PCSX2 (PlayStation 2 Emulator) on Asahi Linux via muvm & FEX-Emu
-# Hardware accelerated via Honeykrisp (Mesa AGX Vulkan/OpenGL)
+# Hardware accelerated via Honeykrisp (Mesa AGX OpenGL/Vulkan)
 
 PCSX2_APP_DIR="$HOME/.local/share/pcsx2/app"
 PULSE_SOCKET="/run/user/$(id -u)/pulse/native"
@@ -10,10 +10,10 @@ if [ ! -d "$PCSX2_APP_DIR" ]; then
     exit 1
 fi
 
-# Ensure standard BIOS and game directories exist
-mkdir -p "$HOME/.config/PCSX2/bios" "$HOME/Games/PS2"
+mkdir -p "$HOME/.config/PCSX2/bios" "$HOME/ROMs/PS2"
 
 exec muvm \
+    -i \
     -e "PULSE_SERVER=$PULSE_SOCKET" \
     -e "QT_SCALE_FACTOR=1.4" \
     -e "LD_LIBRARY_PATH=$PCSX2_APP_DIR/usr/lib" \
