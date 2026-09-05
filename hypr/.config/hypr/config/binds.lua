@@ -128,6 +128,9 @@ hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(noctCall .. "panel-toggle clipboard")
 -- Autoclicker toggle (With Notification status)
 hl.bind(mainMod .. " + ALT + K", hl.dsp.exec_cmd("/home/bry/.local/bin/autoclick-toggle"))
 
+-- GPU Screen Recorder Overlay
+hl.bind("ALT + Z", hl.dsp.exec_cmd("gsr-ui launch-show"))
+
 -----------------
 ---- TV / AV ----
 -----------------

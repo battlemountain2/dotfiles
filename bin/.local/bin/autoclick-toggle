@@ -3,6 +3,7 @@ import os
 import sys
 import time
 import signal
+import traceback
 import subprocess
 from pathlib import Path
 
@@ -31,51 +32,63 @@ def is_pid_alive(pid: int) -> bool:
         return False
 
 def run_worker():
-    from evdev import UInput, ecodes as e
-
-    cps_str = os.environ.get("AUTOCLICKER_CPS", "30")
-    try:
-        cps = float(cps_str)
-    except ValueError:
-        cps = 30.0
-    if cps <= 0:
-        cps = 30.0
-
-    interval = 1.0 / cps
-    down_time = min(0.010, interval * 0.4)
-    up_time = max(0.005, interval - down_time)
+    running = True
 
     def sig_handler(signum, frame):
+        nonlocal running
+        running = False
         sys.exit(0)
 
     signal.signal(signal.SIGTERM, sig_handler)
     signal.signal(signal.SIGINT, sig_handler)
 
     try:
-        ui = UInput({e.EV_KEY: [e.BTN_LEFT]}, name="hypr-autoclicker")
+        from evdev import UInput, ecodes as e
+
+        cps_str = os.environ.get("AUTOCLICKER_CPS", "25")
+        try:
+            cps = float(cps_str)
+        except ValueError:
+            cps = 25.0
+        if cps <= 0:
+            cps = 25.0
+
+        interval = 1.0 / cps
+        # Keep button down long enough (20ms) to pass libinput debounce filter
+        down_time = max(0.018, min(0.025, interval * 0.5))
+        up_time = max(0.015, interval - down_time)
+
+        cap = {
+            e.EV_KEY: [e.BTN_LEFT, e.BTN_RIGHT],
+            e.EV_REL: [e.REL_X, e.REL_Y]
+        }
+        ui = UInput(cap, name="hypr-autoclicker")
+
+        # Give Hyprland & libinput a moment to register the pointer
+        time.sleep(0.15)
+
+        try:
+            while running:
+                ui.write(e.EV_KEY, e.BTN_LEFT, 1)
+                ui.syn()
+                time.sleep(down_time)
+                ui.write(e.EV_KEY, e.BTN_LEFT, 0)
+                ui.syn()
+                time.sleep(up_time)
+        finally:
+            try:
+                ui.write(e.EV_KEY, e.BTN_LEFT, 0)
+                ui.syn()
+                ui.close()
+            except Exception:
+                pass
+    except SystemExit:
+        pass
     except Exception as err:
         with open(LOG_FILE, "a") as f:
-            f.write(f"Failed to create UInput: {err}\n")
+            f.write(f"Worker crashed: {err}\n")
+            traceback.print_exc(file=f)
         sys.exit(1)
-
-    # Allow Wayland/Hyprland to register the virtual device
-    time.sleep(0.1)
-
-    try:
-        while running:
-            ui.write(e.EV_KEY, e.BTN_LEFT, 1)
-            ui.syn()
-            time.sleep(down_time)
-            ui.write(e.EV_KEY, e.BTN_LEFT, 0)
-            ui.syn()
-            time.sleep(up_time)
-    finally:
-        try:
-            ui.write(e.EV_KEY, e.BTN_LEFT, 0)
-            ui.syn()
-            ui.close()
-        except Exception:
-            pass
 
 def toggle():
     if PID_FILE.exists():
@@ -99,7 +112,7 @@ def toggle():
         PID_FILE.unlink(missing_ok=True)
 
     script_path = os.path.abspath(__file__)
-    cps_str = os.environ.get("AUTOCLICKER_CPS", "30")
+    cps_str = os.environ.get("AUTOCLICKER_CPS", "25")
     proc = subprocess.Popen(
         [sys.executable, script_path, "--worker"],
         stdout=subprocess.DEVNULL,

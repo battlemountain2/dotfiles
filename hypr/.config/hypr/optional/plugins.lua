@@ -12,7 +12,7 @@ hl.config({
             gaps_in = 6,
             gaps_out = 12,
             bg_col = "rgb(111111)",
-            workspace_method = "center current",
+            workspace_method = "first 1",
             cancel_key = "escape",
             show_cursor = 1,
             drag_drop_enable = 1,
