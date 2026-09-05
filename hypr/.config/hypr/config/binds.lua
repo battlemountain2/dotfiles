@@ -147,10 +147,10 @@ hl.bind(mainMod .. " + " .. i,           hl.dsp.focus({ workspace = i }))
 hl.bind(mainMod .. " + SHIFT + " .. i,   hl.dsp.window.move({ workspace = i }))
 end
 
-hl.bind(mainMod .. " + CONTROL + Left",  hl.dsp.focus({ workspace = "e-1" }))
-hl.bind(mainMod .. " + CONTROL + Right", hl.dsp.focus({ workspace = "e+1" }))
-hl.bind(mainMod .. " + CONTROL + Up",   hl.dsp.focus({ workspace = "e-3" }))
-hl.bind(mainMod .. " + CONTROL + Down", hl.dsp.focus({ workspace = "e+3" }))
+hl.bind(mainMod .. " + CONTROL + Left",  hl.dsp.focus({ workspace = "-1" }))
+hl.bind(mainMod .. " + CONTROL + Right", hl.dsp.focus({ workspace = "+1" }))
+hl.bind(mainMod .. " + CONTROL + Up",   hl.dsp.focus({ workspace = "-3" }))
+hl.bind(mainMod .. " + CONTROL + Down", hl.dsp.focus({ workspace = "+3" }))
 -- Jump to the next empty workspace on this monitor
 hl.bind(mainMod .. " + Home", hl.dsp.focus({ workspace = "emptym" }))
 

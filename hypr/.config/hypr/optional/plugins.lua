@@ -48,3 +48,36 @@ hl.bind(mainMod .. " + Tab", function()
         hl.dispatch("hyprexpo:expo", "toggle")
     end
 end)
+
+-- HyprExpo active submap for keyboard navigation
+hl.define_submap("hyprexpo", function()
+    -- Arrow navigation (both plain and with SUPER held down)
+    hl.bind("left",                function() hl.plugin.hyprexpo.kb_focus("left") end)
+    hl.bind("right",               function() hl.plugin.hyprexpo.kb_focus("right") end)
+    hl.bind("up",                  function() hl.plugin.hyprexpo.kb_focus("up") end)
+    hl.bind("down",                function() hl.plugin.hyprexpo.kb_focus("down") end)
+
+    hl.bind(mainMod .. " + Left",  function() hl.plugin.hyprexpo.kb_focus("left") end)
+    hl.bind(mainMod .. " + Right", function() hl.plugin.hyprexpo.kb_focus("right") end)
+    hl.bind(mainMod .. " + Up",    function() hl.plugin.hyprexpo.kb_focus("up") end)
+    hl.bind(mainMod .. " + Down",  function() hl.plugin.hyprexpo.kb_focus("down") end)
+
+    -- Vim keys
+    hl.bind("h", function() hl.plugin.hyprexpo.kb_focus("left") end)
+    hl.bind("l", function() hl.plugin.hyprexpo.kb_focus("right") end)
+    hl.bind("k", function() hl.plugin.hyprexpo.kb_focus("up") end)
+    hl.bind("j", function() hl.plugin.hyprexpo.kb_focus("down") end)
+
+    -- Selection / Confirm / Cancel
+    hl.bind("return",            function() hl.plugin.hyprexpo.kb_confirm() end)
+    hl.bind("space",             function() hl.plugin.hyprexpo.kb_confirm() end)
+    hl.bind("escape",            function() hl.plugin.hyprexpo.expo("cancel") end)
+    hl.bind(mainMod .. " + Tab", function() hl.plugin.hyprexpo.expo("toggle") end)
+
+    -- Direct 1-9 workspace selection
+    for i = 1, 9 do
+        hl.bind(tostring(i),           function() hl.plugin.hyprexpo.kb_selecti(i) end)
+        hl.bind(mainMod .. " + " .. i, function() hl.plugin.hyprexpo.kb_selecti(i) end)
+    end
+end)
+
