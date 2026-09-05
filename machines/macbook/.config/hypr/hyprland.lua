@@ -126,4 +126,29 @@ o.window({ class = "^(localsend.*)$" }, {
   size = { 460, 680 },
 })
 
+-- Gaming Emulators: float centered in 16:9 720p window
+o.window({ class = "^(retroarch)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^([pP][pP][sS][sS][pP][pP].*)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^(dolphin-emu)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^(pcsx2.*)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
 
