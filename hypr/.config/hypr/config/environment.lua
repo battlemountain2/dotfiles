@@ -6,3 +6,4 @@ hl.env("GDK_BACKEND", "wayland,x11,*")
 hl.env("XCURSOR_THEME", "breeze_cursors")
 hl.env("XCURSOR_SIZE", "24")  -- 48 on a HiDPI panel running scale 2
 hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
+hl.env("GTK_USE_PORTAL", "1")
