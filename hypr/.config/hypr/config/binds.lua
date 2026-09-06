@@ -7,20 +7,11 @@ local launchPrefix = "" -- if you are not using UWSM, make this empty (e.g. "")
 ---------------------------
 
 -- Window manipulation
--- killhovered comes from hyprtasking, which optional/plugins.lua treats as
--- possibly-absent. Without a fallback, a failed plugin build leaves you with
--- no way to close a window at all. Chain is deliberate: the Lua dispatcher
--- name for killactive is not confirmed on this version, so hyprctl is the
--- guaranteed last resort.
-hl.bind(mainMod .. " + Q", function()
-    if hl.plugin and hl.plugin.hyprtasking then
-        hl.plugin.hyprtasking.killhovered()
-    elseif hl.dsp and hl.dsp.window and hl.dsp.window.kill then
-        hl.dispatch(hl.dsp.window.kill())
-    else
-        hl.dispatch(hl.dsp.exec_cmd("hyprctl dispatch killactive"))
-    end
-end)
+-- Use window.close() to gracefully close the active window (xdg_toplevel.close).
+-- Note: window.kill() sends SIGKILL to the process PID, which kills all windows
+-- belonging to multi-window processes (e.g. Helium/Chromium/Brave/Firefox).
+hl.bind(mainMod .. " + Q", hl.dsp.window.close())
+hl.bind(mainMod .. " + SHIFT + Q", hl.dsp.window.kill())
 hl.bind(mainMod .. " + F",           hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + ALT + Space", hl.dsp.window.float({ action = "toggle" }))
 pcall(hl.unbind, mainMod .. " + W")
