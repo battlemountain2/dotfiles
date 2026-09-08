@@ -9,4 +9,6 @@
 hl.env("LIBVA_DRIVER_NAME", "nvidia")
 hl.env("__GLX_VENDOR_LIBRARY_NAME", "nvidia")
 hl.env("NVD_BACKEND", "direct")
-hl.env("GBM_BACKEND", "nvidia-drm")
+-- Explicitly lock primary DRM rendering to the discrete NVIDIA RTX 4070 SUPER
+-- over the AMD Ryzen integrated graphics across reboots and sleep/resume cycles.
+hl.env("AQ_DRM_DEVICES", "/dev/dri/by-path/pci-0000:01:00.0-card:/dev/dri/by-path/pci-0000:10:00.0-card")
