@@ -6,6 +6,7 @@ local colors = require("config.colors")
 hl.config({
     render = {
         cm_auto_hdr = 1,
+        direct_scanout = 2,
     },
     dwindle = {
         preserve_split = true,
