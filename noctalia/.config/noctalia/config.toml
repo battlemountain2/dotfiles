@@ -128,7 +128,21 @@ source = "wallpaper"
 wallpaper_scheme = "m3-tonal-spot"
 
     [theme.templates]
+    enable_builtin_templates = true
+    enable_community_templates = true
     builtin_ids = [ "btop", "gtk3", "gtk4", "kcolorscheme", "kitty", "qt", "alacritty" ]
+    community_ids = [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "discord",
+        "fastfetch",
+        "hyprtoolkit",
+        "obs",
+        "prismlauncher",
+        "steam",
+        "zed"
+    ]
 
 [widget.workspaces]
 style = "focus_hint"
