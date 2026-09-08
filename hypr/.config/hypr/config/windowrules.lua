@@ -84,12 +84,20 @@ hl.window_rule({
     size = fileWindowSize,
 })
 
--- Opacity Overrides
+-- Opacity Overrides (100% Solid Opaque / Zero Transparency)
+-- Prevents background bleed-through and preserves color accuracy for video playback,
+-- photo viewing, web browsing, creative tools, and games whether active or inactive.
 local terminals = "^(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)$"
+local browsers = "^([Hh]elium.*|[Ff]irefox.*|[Zz]en.*|[Gg]oogle-chrome.*|[Cc]hromium.*|[Bb]rave-browser.*|chrome-.*)$"
+local mediaPlayers = "^(.*[Ss]tremio.*|[Cc]ider.*|[Ss]potify.*|mpv|.*vlc.*|.*haruna.*|org\\.kde\\.elisa|.*plex.*|kodi|celluloid|totem|FreeTube)$"
+local creativeAndGraphics = "^(.*gwenview.*|loupe|eog|imv|feh|viewnior|nomacs|Gimp.*|gimp.*|.*inkscape.*|blender|krita|kdenlive)$"
+local opaqueUtilities = "^(com\\.obsproject\\.Studio|obs|gpu-screen-recorder-ui|.*satty.*|steam|steamwebhelper|sober|org\\.vinegarhq\\.Sober|PrismLauncher|heroic|lutris|org\\.kde\\.okular|libreoffice.*)$"
 
-hl.window_rule({ match = { class = "^(firefox|zen)$" }, opacity = "1.0 override" })
 hl.window_rule({ match = { class = terminals }, opacity = "1.0 override" })
-hl.window_rule({ match = { class = "^(mpv|org.kde.haruna|.*plex.*|org\\.kde\\.gwenview|.*vlc.*)$" }, opacity = "1.0 override" })
+hl.window_rule({ match = { class = browsers }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ match = { class = mediaPlayers }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ match = { class = creativeAndGraphics }, opacity = "1.0 override 1.0 override" })
+hl.window_rule({ match = { class = opaqueUtilities }, opacity = "1.0 override 1.0 override" })
 
 -- Float Utility Windows
 local floatApps = {
