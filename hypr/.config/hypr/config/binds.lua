@@ -19,7 +19,8 @@ hl.bind(mainMod .. " + W",           hl.dsp.window.fullscreen({ mode = "maximize
 pcall(hl.unbind, mainMod .. " + SHIFT + W")
 hl.bind(mainMod .. " + SHIFT + W",   hl.dsp.window.fullscreen({ mode = "fullscreen" }))
 hl.bind(mainMod .. " + J",           hl.dsp.layout("togglesplit"))
-hl.bind(mainMod .. " + P",           hl.dsp.window.pin())
+hl.bind(mainMod .. " + SHIFT + P",   hl.dsp.window.pin())
+hl.bind(mainMod .. " + P",           hl.dsp.exec_cmd(noctCall .. "panel-toggle oldirtty/color_picker:panel"))
 
 -- Baseline Focus Controls
 hl.bind(mainMod .. " + Left",  function() hl.dispatch(hl.dsp.focus({ direction = "left" })) end)
@@ -67,7 +68,7 @@ hl.bind(mainMod .. " + ALT + Down",  hl.dsp.window.resize({ x = 0, y = step,  re
 hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd(launchPrefix .. EDITOR))
 hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd(launchPrefix .. FILE_MANAGER))
 hl.bind(mainMod .. " + T",          hl.dsp.exec_cmd(launchPrefix .. TERMINAL))
-hl.bind(mainMod .. " + C",          hl.dsp.exec_cmd(launchPrefix .. CALCULATOR))
+hl.bind(mainMod .. " + C",          hl.dsp.exec_cmd(noctCall .. "panel-toggle yuuto/calculator:panel"))
 hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd(launchPrefix .. BROWSER))
 hl.bind("CONTROL + SHIFT + Escape", hl.dsp.exec_cmd(launchPrefix .. TERMINAL .. " -e btop"))
 hl.bind(mainMod .. " + Z",          hl.dsp.exec_cmd(noctCall .. "settings-toggle"))
