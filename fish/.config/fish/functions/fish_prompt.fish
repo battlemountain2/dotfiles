@@ -5,9 +5,9 @@ function fish_prompt
     set -l last_status $status
 
     if test $last_status -ne 0
-        set_color ff7b72
+        set_color red
     else
-        set_color 94cdf6
+        set_color blue
     end
 
     echo -n (prompt_pwd)
