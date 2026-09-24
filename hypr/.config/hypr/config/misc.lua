@@ -15,6 +15,8 @@ hl.config({
         force_split = 2,
     },
     misc = {
+        disable_hyprland_logo = true,
+        vrr = 3, -- Fullscreen games only; preserved from the former GUI config.
         col = {
             splash = colors.PRIMARY,
         },
@@ -30,4 +32,3 @@ hl.config({
         no_donation_nag = true,
     },
 })
-

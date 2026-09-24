@@ -1,5 +1,9 @@
 -- Auto-start config
+-- Sole plugin loader: hyprexpo is locally maintained; do not also run hyprpm
+-- reload at startup. Source/rollback notes: ~/Projects/hyprexpo-fix/LOCAL-FIX.md.
 hl.on("hyprland.start", function ()
+-- Complete KWallet PAM unlock using the login session environment.
+hl.exec_cmd("/usr/lib/pam_kwallet_init")
 hl.exec_cmd("hyprctl plugin load /home/bry/.config/hypr/plugins/hyprexpo.so")
 hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 hl.exec_cmd("systemctl --user import-environment HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY && systemctl --user restart xdg-desktop-portal-hyprland")

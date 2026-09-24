@@ -69,8 +69,9 @@ require("config.workspaces")
 pcall(require, "optional.plugins")
 
 
---Hyprmod--
-require("hyprland-gui")
+-- Monitor and startup settings live in optional/monitors-<host> and
+-- config/autostart. Do not load hyprland-gui: its generated monitor and
+-- HyprPM startup entries would override these. Saved profiles are references.
 
 -- MANAGED BY NOCTALIA. Its Hyprland template re-adds this line if it goes
 -- missing, so deleting it is pointless while Noctalia is installed. Verified
@@ -96,3 +97,6 @@ require("noctalia").apply_theme()
 -- borders will silently go flat -- see the notes in config/borders.lua.
 -- ---------------------------------------------------------------------------
 require("config.borders")
+
+-- HyprMod managed settings
+require("hyprland-gui")

@@ -1,11 +1,16 @@
 [General]
-AlwaysShowTabBar=false
 DynamicView=true
-EditableUrl=false
+FilterBar=true
 GlobalViewProps=false
 OpenExternallyCalledFolderInNewTab=true
+ShowFullPath=true
+ShowFullPathInTitlebar=true
 Version=202
 ViewPropsTimestamp=2026,9,4,12,37,15.427
+
+[InformationPanel]
+previewsAutoPlay=true
+showHovered=false
 
 [KFileDialog Settings]
 Places Icons Auto-resize=false
@@ -15,7 +20,7 @@ Places Icons Static Size=22
 MenuBar=Disabled
 
 [PreviewSettings]
-Plugins=ffmpegthumbnailer,appimagethumbnail,audiothumbnail,glycin-heif,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,imagethumbnail,glycin-image-rs,jpegthumbnail,glycin-jxl,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,ffmpegthumbnailer-audio,glycin-svg,svgthumbnail,textthumbnail,gsf-office
+Plugins=ffmpegthumbnailer,appimagethumbnail,audiothumbnail,glycin-heif,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,FreeCAD,imagethumbnail,glycin-image-rs,jpegthumbnail,glycin-jxl,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,gsthumbnail,rawthumbnail,ffmpegthumbnailer-audio,glycin-svg,svgthumbnail,textthumbnail,gsf-office
 
 [UiSettings]
 ColorScheme=Noctalia

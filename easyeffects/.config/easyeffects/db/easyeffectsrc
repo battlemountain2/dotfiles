@@ -12,6 +12,6 @@ outputDevice=alsa_output.usb-FIIO_FiiO_K11_R2R-01.playback.0.0
 
 [Window]
 autostartOnLogin=true
-height=1380
+height=1384
 visiblePage=inputPage
-width=1264
+width=2544

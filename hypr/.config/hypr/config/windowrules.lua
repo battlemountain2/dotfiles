@@ -90,7 +90,7 @@ hl.window_rule({
 local terminals = "^(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)$"
 local browsers = "^([Hh]elium.*|[Ff]irefox.*|[Zz]en.*|[Gg]oogle-chrome.*|[Cc]hromium.*|[Bb]rave-browser.*|chrome-.*)$"
 local mediaPlayers = "^(.*[Ss]tremio.*|[Cc]ider.*|[Ss]potify.*|mpv|.*vlc.*|.*haruna.*|org\\.kde\\.elisa|.*plex.*|kodi|celluloid|totem|FreeTube)$"
-local creativeAndGraphics = "^(.*gwenview.*|loupe|eog|imv|feh|viewnior|nomacs|Gimp.*|gimp.*|.*inkscape.*|blender|krita|kdenlive)$"
+local creativeAndGraphics = "^(.*gwenview.*|loupe|eog|imv|feh|viewnior|nomacs|Gimp.*|gimp.*|.*inkscape.*|blender|krita|kdenlive|org\\.freecad\\.FreeCAD)$"
 local opaqueUtilities = "^(com\\.obsproject\\.Studio|obs|gpu-screen-recorder-ui|.*satty.*|steam|steamwebhelper|sober|org\\.vinegarhq\\.Sober|PrismLauncher|heroic|lutris|org\\.kde\\.okular|libreoffice.*)$"
 
 hl.window_rule({ match = { class = terminals }, opacity = "1.0 override" })
