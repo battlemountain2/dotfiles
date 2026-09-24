@@ -1,0 +1,190 @@
+#!/usr/bin/env python3
+"""
+dotfiles - Safe synchronization manager for Bry's CachyOS dotfiles
+Allows syncing configs without risky symlinks that disrupt running processes.
+"""
+
+import sys
+import os
+import shutil
+import difflib
+import subprocess
+
+DOTFILES_DIR = os.path.expanduser("~/dotfiles")
+HOME_DIR = os.path.expanduser("~")
+
+# Packages in ~/dotfiles
+EXCLUDE_DIRS = {".git", "machines"}
+
+def get_packages():
+    pkgs = []
+    for entry in os.listdir(DOTFILES_DIR):
+        full_path = os.path.join(DOTFILES_DIR, entry)
+        if os.path.isdir(full_path) and entry not in EXCLUDE_DIRS:
+            pkgs.append(entry)
+    pkgs.sort()
+    return pkgs
+
+def get_package_files():
+    """Returns list of (pkg, relative_to_pkg, full_repo_path, full_home_path)"""
+    file_list = []
+    for pkg in get_packages():
+        pkg_root = os.path.join(DOTFILES_DIR, pkg)
+        for root, _, files in os.walk(pkg_root):
+            for f in files:
+                repo_path = os.path.join(root, f)
+                rel_path = os.path.relpath(repo_path, pkg_root)
+                home_path = os.path.join(HOME_DIR, rel_path)
+                file_list.append((pkg, rel_path, repo_path, home_path))
+    return file_list
+
+def cmd_status():
+    print(f"\033[1;34mScanning dotfiles in {DOTFILES_DIR} against {HOME_DIR}...\033[0m\n")
+    files = get_package_files()
+    modified = []
+    missing_in_home = []
+    in_sync = []
+
+    for pkg, rel, repo_path, home_path in files:
+        if not os.path.exists(home_path):
+            missing_in_home.append((pkg, rel))
+            continue
+        try:
+            with open(repo_path, "rb") as rf, open(home_path, "rb") as hf:
+                if rf.read() != hf.read():
+                    modified.append((pkg, rel, repo_path, home_path))
+                else:
+                    in_sync.append((pkg, rel))
+        except Exception as e:
+            print(f"Error checking {rel}: {e}")
+
+    if modified:
+        print("\033[1;33mModified in system (~/) vs repo:\033[0m")
+        for pkg, rel, _, _ in modified:
+            print(f"  \033[33m• [{pkg}]\033[0m {rel}")
+        print()
+    
+    if missing_in_home:
+        print("\033[1;31mTracked in repo but missing in ~/:\033[0m")
+        for pkg, rel in missing_in_home:
+            print(f"  \033[31m• [{pkg}]\033[0m {rel}")
+        print()
+
+    print(f"\033[1;32m✓ {len(in_sync)} files in sync\033[0m")
+    if modified:
+        print(f"\033[1;33m! {len(modified)} files modified (run 'dotfiles diff' or 'dotfiles pull')\033[0m")
+    if missing_in_home:
+        print(f"\033[1;31m✗ {len(missing_in_home)} files missing in home\033[0m")
+
+def cmd_diff():
+    files = get_package_files()
+    found_diff = False
+    for pkg, rel, repo_path, home_path in files:
+        if not os.path.exists(home_path):
+            continue
+        try:
+            with open(repo_path, "r", encoding="utf-8", errors="replace") as rf:
+                repo_lines = rf.readlines()
+            with open(home_path, "r", encoding="utf-8", errors="replace") as hf:
+                home_lines = hf.readlines()
+            
+            diff = list(difflib.unified_diff(
+                repo_lines,
+                home_lines,
+                fromfile=f"repo/{pkg}/{rel}",
+                tofile=f"~/{rel}",
+                lineterm=""
+            ))
+            if diff:
+                found_diff = True
+                print(f"\n\033[1;36m=== [{pkg}] {rel} ===\033[0m")
+                for line in diff:
+                    if line.startswith("+"):
+                        print(f"\033[32m{line}\033[0m")
+                    elif line.startswith("-"):
+                        print(f"\033[31m{line}\033[0m")
+                    elif line.startswith("@@"):
+                        print(f"\033[35m{line}\033[0m")
+                    else:
+                        print(line)
+        except Exception as e:
+            print(f"Error diffing {rel}: {e}")
+    if not found_diff:
+        print("\033[32mNo differences between ~/ and repo!\033[0m")
+
+def cmd_pull():
+    """Copy modified files from ~/ into ~/dotfiles/"""
+    files = get_package_files()
+    copied = 0
+    for pkg, rel, repo_path, home_path in files:
+        if not os.path.exists(home_path):
+            continue
+        # Check if different
+        with open(repo_path, "rb") as rf, open(home_path, "rb") as hf:
+            if rf.read() == hf.read():
+                continue
+        # Copy
+        os.makedirs(os.path.dirname(repo_path), exist_ok=True)
+        shutil.copy2(home_path, repo_path)
+        print(f"\033[32mSynced to repo:\033[0m [{pkg}] {rel}")
+        copied += 1
+
+    if copied > 0:
+        print(f"\n\033[1;32m✓ Successfully pulled {copied} file(s) into ~/dotfiles\033[0m")
+        print("Run 'git -C ~/dotfiles status' or 'git -C ~/dotfiles diff' to review and commit.")
+    else:
+        print("\033[32mAlready up to date. No changes to pull.\033[0m")
+
+def cmd_push():
+    """Safely copy from ~/dotfiles/ into ~/ with backup"""
+    files = get_package_files()
+    copied = 0
+    backup_dir = os.path.expanduser("~/.dotfiles_backup_push")
+    for pkg, rel, repo_path, home_path in files:
+        if not os.path.exists(repo_path):
+            continue
+        if os.path.exists(home_path):
+            with open(repo_path, "rb") as rf, open(home_path, "rb") as hf:
+                if rf.read() == hf.read():
+                    continue
+            # Backup existing
+            b_path = os.path.join(backup_dir, rel)
+            os.makedirs(os.path.dirname(b_path), exist_ok=True)
+            shutil.copy2(home_path, b_path)
+
+        os.makedirs(os.path.dirname(home_path), exist_ok=True)
+        shutil.copy2(repo_path, home_path)
+        print(f"\033[32mApplied to system:\033[0m [{pkg}] {rel}")
+        copied += 1
+
+    if copied > 0:
+        print(f"\n\033[1;32m✓ Applied {copied} file(s) from ~/dotfiles into ~/\033[0m")
+        print(f"(Backups of previous versions saved in {backup_dir})")
+    else:
+        print("\033[32mAlready up to date. No changes to push.\033[0m")
+
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: dotfiles <command>")
+        print("\nCommands:")
+        print("  status    Show files modified between system and repo")
+        print("  diff      Show unified diff of changes in system vs repo")
+        print("  pull      Copy changes from system (~/) into repo (~/dotfiles/)")
+        print("  push      Deploy changes from repo (~/dotfiles/) into system (~/)")
+        sys.exit(0)
+
+    cmd = sys.argv[1].lower()
+    if cmd == "status":
+        cmd_status()
+    elif cmd == "diff":
+        cmd_diff()
+    elif cmd in ("pull", "sync"):
+        cmd_pull()
+    elif cmd in ("push", "apply"):
+        cmd_push()
+    else:
+        print(f"Unknown command: {cmd}")
+        sys.exit(1)
+
+if __name__ == "__main__":
+    main()
