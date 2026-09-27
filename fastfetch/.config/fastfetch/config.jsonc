@@ -7,22 +7,22 @@
       "top": 1
     },
     "color": {
-      "1": "#ffb563",
-      "2": "#e7be63"
+      "1": "#63cdf6",
+      "2": "#63c9d8"
     }
   },
   "display": {
     "separator": " ~ ",
     "color": {
-      "keys": "#ffb59a",
-      "title": "#e7beaf",
-      "separator": "#e7beaf"
+      "keys": "#94cdf6",
+      "title": "#b7c9d8",
+      "separator": "#b7c9d8"
     },
     "brightColor": true,
     "percent": {
       "color": {
-        "green": "#d5c68e",
-        "yellow": "#ffb59a",
+        "green": "#cdc0e9",
+        "yellow": "#94cdf6",
         "red": "#ffb4ab"
       }
     }
