@@ -22,9 +22,7 @@ hl.bind(mainMod .. " + J",           hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + SHIFT + P",   hl.dsp.window.pin())
 hl.bind(mainMod .. " + P",           hl.dsp.exec_cmd(noctCall .. "panel-toggle oldirtty/color_picker:panel"))
 
--- Baseline Focus Controls
-hl.bind(mainMod .. " + Left",  function() hl.dispatch(hl.dsp.focus({ direction = "left" })) end)
-hl.bind(mainMod .. " + Right", function() hl.dispatch(hl.dsp.focus({ direction = "right" })) end)
+-- Baseline Focus Controls & Carousel Navigation
 -- Each monitor has nine numbered workspaces; include empty destinations.
 local function adjacent_workspace(delta)
     local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
@@ -38,25 +36,40 @@ local function adjacent_workspace(delta)
     local target = math.max(first, math.min(last, ws.id + delta))
     if target ~= ws.id then return target end
 end
-local function vertical_navigation(direction, delta)
-    return function()
-        local monitor = hl.get_active_monitor()
-        local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
-        if not monitor or not ws then return end
 
-        if monitor.name == "DP-2" or ws.tiled_layout == "scrolling" then
-            -- On the vertical/scrolling monitor, move focus down/up between stacked windows.
-            hl.dispatch(hl.dsp.focus({ direction = direction }))
-        elseif monitor.name == "DP-1" and ws.id >= 1 and ws.id <= 9 then
-            local target = math.max(1, math.min(9, ws.id + delta))
-            if target ~= ws.id then
-                hl.dispatch(hl.dsp.focus({ workspace = target }))
+-- Carousel navigation for scrolling layouts on both monitors.
+-- Moves across windows/columns within the active monitor's carousel,
+-- preventing monitor-hopping and avoiding accidental workspace jumps.
+local function navigate_carousel(dir, delta)
+    return function()
+        local orig_mon = hl.get_active_monitor()
+        local orig_ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+        if not orig_mon or not orig_ws then return end
+        local orig_mon_name = orig_mon.name
+        local orig_ws_id = orig_ws.id
+
+        -- Try directional focus first
+        hl.dispatch(hl.dsp.focus({ direction = dir }))
+
+        local new_mon = hl.get_active_monitor()
+        local new_ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+
+        -- If focus tried to jump across monitors or workspaces:
+        if (new_mon and new_mon.name ~= orig_mon_name) or (new_ws and new_ws.id ~= orig_ws_id) then
+            hl.dispatch(hl.dsp.focus({ monitor = orig_mon_name }))
+            hl.dispatch(hl.dsp.layout(delta > 0 and "move +col" or "move -col"))
+            local final_mon = hl.get_active_monitor()
+            if final_mon and final_mon.name ~= orig_mon_name then
+                hl.dispatch(hl.dsp.focus({ monitor = orig_mon_name }))
             end
         end
     end
 end
-hl.bind(mainMod .. " + Up",   vertical_navigation("up", -1))
-hl.bind(mainMod .. " + Down", vertical_navigation("down", 1))
+
+hl.bind(mainMod .. " + Left",  navigate_carousel("left",  -1))
+hl.bind(mainMod .. " + Right", navigate_carousel("right",  1))
+hl.bind(mainMod .. " + Up",    navigate_carousel("up",    -1))
+hl.bind(mainMod .. " + Down",  navigate_carousel("down",   1))
 
 hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
 
