@@ -25,8 +25,38 @@ hl.bind(mainMod .. " + P",           hl.dsp.exec_cmd(noctCall .. "panel-toggle o
 -- Baseline Focus Controls
 hl.bind(mainMod .. " + Left",  function() hl.dispatch(hl.dsp.focus({ direction = "left" })) end)
 hl.bind(mainMod .. " + Right", function() hl.dispatch(hl.dsp.focus({ direction = "right" })) end)
-hl.bind(mainMod .. " + Up",    function() hl.dispatch(hl.dsp.focus({ direction = "up" })) end)
-hl.bind(mainMod .. " + Down",  function() hl.dispatch(hl.dsp.focus({ direction = "down" })) end)
+-- Each monitor has nine numbered workspaces; include empty destinations.
+local function adjacent_workspace(delta)
+    local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+    local monitor = hl.get_active_monitor()
+    if not ws or not monitor then return nil end
+    local first, last
+    if monitor.name == "DP-1" then first, last = 1, 9
+    elseif monitor.name == "DP-2" then first, last = 10, 18
+    else return nil end
+    if ws.id < first or ws.id > last then return nil end
+    local target = math.max(first, math.min(last, ws.id + delta))
+    if target ~= ws.id then return target end
+end
+local function vertical_navigation(direction, delta)
+    return function()
+        local monitor = hl.get_active_monitor()
+        local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+        if not monitor or not ws then return end
+
+        if monitor.name == "DP-2" or ws.tiled_layout == "scrolling" then
+            -- On the vertical/scrolling monitor, move focus down/up between stacked windows.
+            hl.dispatch(hl.dsp.focus({ direction = direction }))
+        elseif monitor.name == "DP-1" and ws.id >= 1 and ws.id <= 9 then
+            local target = math.max(1, math.min(9, ws.id + delta))
+            if target ~= ws.id then
+                hl.dispatch(hl.dsp.focus({ workspace = target }))
+            end
+        end
+    end
+end
+hl.bind(mainMod .. " + Up",   vertical_navigation("up", -1))
+hl.bind(mainMod .. " + Down", vertical_navigation("down", 1))
 
 hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
 
@@ -36,15 +66,45 @@ hl.bind(mainMod .. " + SHIFT + Right", hl.dsp.window.move({ direction = "right" 
 hl.bind(mainMod .. " + SHIFT + Up",    hl.dsp.window.move({ direction = "up" }))
 hl.bind(mainMod .. " + SHIFT + Down",  hl.dsp.window.move({ direction = "down" }))
 
--- Take the window with you
-hl.bind(mainMod .. " + CONTROL + mouse_down", hl.dsp.window.move({ workspace = "m+1" }))
-hl.bind(mainMod .. " + CONTROL + mouse_up",   hl.dsp.window.move({ workspace = "m-1" }))
+-- Browse the LG's vertical scrolling layout; elsewhere take the window with you.
+local function ctrl_scroll(direction, workspace_delta)
+    return function()
+        local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+        if ws and ws.tiled_layout == "scrolling" and ws.id >= 10 and ws.id <= 18 then
+            -- Move the carousel view itself by one window-sized step.
+            hl.dispatch(hl.dsp.layout(direction == "down" and "move +col" or "move -col"))
+        elseif ws and ws.id >= 1 and ws.id <= 9 then
+            -- Numeric targets create empty destinations; m+/-1 only visits existing ones.
+            local step = direction == "down" and 1 or -1
+            local target = ((ws.id - 1 + step) % 9) + 1
+            hl.dispatch(hl.dsp.window.move({ workspace = target }))
+        else
+            hl.dispatch(hl.dsp.window.move({ workspace = workspace_delta }))
+        end
+    end
+end
+hl.bind(mainMod .. " + CONTROL + mouse_down", ctrl_scroll("down", "m+1"))
+hl.bind(mainMod .. " + CONTROL + mouse_up",   ctrl_scroll("up", "m-1"))
 
 -- Send the window and go with it
 hl.bind(mainMod .. " + CONTROL + SHIFT + Right", hl.dsp.window.move({ workspace = "r+1" }))
 hl.bind(mainMod .. " + CONTROL + SHIFT + Left",  hl.dsp.window.move({ workspace = "r-1" }))
 hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_down", hl.dsp.window.move({ workspace = "r+1", follow = false }))
 hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_up",   hl.dsp.window.move({ workspace = "r-1", follow = false }))
+
+-- Focus a display while leaving fullscreen windows on their current workspace.
+hl.bind(mainMod .. " + ALT + 1", function()
+    hl.dispatch(hl.dsp.focus({ monitor = "DP-1" }))
+    hl.dispatch(hl.dsp.cursor.move({ x = 1280, y = 720 }))
+end)
+hl.bind(mainMod .. " + ALT + 2", function()
+    hl.dispatch(hl.dsp.focus({ monitor = "DP-2" }))
+    hl.dispatch(hl.dsp.cursor.move({ x = 3280, y = 160 }))
+end)
+
+-- Move the focused window onto the target monitor's active workspace.
+hl.bind(mainMod .. " + ALT + mouse_up",   hl.dsp.window.move({ monitor = "DP-1" }))
+hl.bind(mainMod .. " + ALT + mouse_down", hl.dsp.window.move({ monitor = "DP-2" }))
 
 -- Move window to workspace N without following it
 for i = 1, 9 do
@@ -141,8 +201,17 @@ end
 
 hl.bind(mainMod .. " + CONTROL + Left",  hl.dsp.focus({ workspace = "-1" }))
 hl.bind(mainMod .. " + CONTROL + Right", hl.dsp.focus({ workspace = "+1" }))
-hl.bind(mainMod .. " + CONTROL + Up",   hl.dsp.focus({ workspace = "-3" }))
-hl.bind(mainMod .. " + CONTROL + Down", hl.dsp.focus({ workspace = "+3" }))
+-- Move the window one workspace on its monitor and follow it.
+local function ctrl_vertical_navigation(delta)
+    return function()
+        local target = adjacent_workspace(delta)
+        if target then
+            hl.dispatch(hl.dsp.window.move({ workspace = target, follow = true }))
+        end
+    end
+end
+hl.bind(mainMod .. " + CONTROL + Up", ctrl_vertical_navigation(-1))
+hl.bind(mainMod .. " + CONTROL + Down", ctrl_vertical_navigation(1))
 -- Jump to the next empty workspace on this monitor
 hl.bind(mainMod .. " + Home", hl.dsp.focus({ workspace = "emptym" }))
 
@@ -166,3 +235,17 @@ hl.bind(mainMod .. " + SHIFT + S", function()
 local current_ws = hl.get_active_monitor().active_workspace.id
 hl.dispatch(hl.dsp.window.move({ workspace = current_ws }))
 end)
+
+
+
+-- Desktop magnification, independent of individual app zoom.
+local function desktop_zoom(multiplier)
+    return function()
+        local current = hl.get_config("cursor.zoom_factor") or 1.0
+        local target = math.max(1.0, math.min(4.0, current * multiplier))
+        if target < 1.01 then target = 1.0 end
+        hl.config({ cursor = { zoom_factor = target } })
+    end
+end
+hl.bind("SUPER + SHIFT + mouse_up", desktop_zoom(1.1), { submap_universal = true })
+hl.bind("SUPER + SHIFT + mouse_down", desktop_zoom(1 / 1.1), { submap_universal = true })
