@@ -1,7 +1,11 @@
 -- Input configuration
 
 hl.config({
+    cursor = { no_warps = true, zoom_detached_camera = false, zoom_rigid = false, zoom_disable_aa = true },
+    scrolling = { follow_focus = false },
     input = {
+        -- Focus on hover across all windows
+        follow_mouse = 1,
         -- sensitivity = -0.25,
         accel_profile = "flat",
     },
