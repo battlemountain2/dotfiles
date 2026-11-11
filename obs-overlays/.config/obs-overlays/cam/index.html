@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Camera Accent Frame</title>
+  <style>
+    :root {
+      --accent-color: #a3be8c;
+      --accent-glow: rgba(163, 190, 140, 0.4);
+    }
+    body.theme-catppuccin {
+      --accent-color: #cba6f7;
+      --accent-glow: rgba(203, 166, 247, 0.45);
+    }
+    body.theme-tokyo-night {
+      --accent-color: #7dcfff;
+      --accent-glow: rgba(125, 207, 255, 0.45);
+    }
+    body.theme-cyberpunk {
+      --accent-color: #feea28;
+      --accent-glow: rgba(254, 234, 40, 0.5);
+    }
+    body.theme-monochrome {
+      --accent-color: #ffffff;
+      --accent-glow: rgba(255, 255, 255, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      background: transparent;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+    }
+    .cam-frame {
+      width: 100%;
+      height: 100%;
+      /* Crisp 1px subtle accent border */
+      border: 1px solid var(--accent-color);
+      box-shadow: 0 0 6px var(--accent-glow);
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="cam-frame"></div>
+  <script>
+    function applyTheme(t) {
+      if (!t) return;
+      document.body.className = '';
+      if (t !== 'matcha') document.body.classList.add('theme-' + t);
+    }
+    function pollTheme() {
+      fetch('/api/theme')
+        .then(res => res.json())
+        .then(data => { if (data && data.theme) applyTheme(data.theme); })
+        .catch(() => {});
+      setTimeout(pollTheme, 3000);
+    }
+    pollTheme();
+  </script>
+</body>
+</html>

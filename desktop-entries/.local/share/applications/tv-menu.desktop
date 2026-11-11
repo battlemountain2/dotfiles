@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TV Controls
+Comment=Control the living room TV
+Exec=/home/bry/.local/bin/tv menu
+Icon=video-television
+Terminal=false
+Categories=AudioVideo;
+Keywords=TV;Onn;Remote;Netflix;Stremio;

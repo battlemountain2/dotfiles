@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Starting Soon</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font: 'JetBrains Mono', monospace;
+      --card-bg: rgba(18, 20, 24, 0.88);
+      --card-border: rgba(255, 255, 255, 0.12);
+      --tape-bg: rgba(255, 255, 255, 0.14);
+      --text-main: #f1f5f9;
+      --text-sub: #94a3b8;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      font-family: var(--font);
+      background: transparent;
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* Homemade taped-note aesthetic */
+    .note-card {
+      position: relative;
+      background: var(--card-bg);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 18px 32px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .title {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--text-sub);
+      letter-spacing: 0.01em;
+    }
+  </style>
+</head>
+<body>
+  <div class="note-card">
+    <div class="title">starting soon...</div>
+    <div class="subtitle">grabbing water & warming up</div>
+  </div>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('title')) document.querySelector('.title').textContent = params.get('title');
+    if (params.get('sub')) document.querySelector('.subtitle').textContent = params.get('sub');
+  </script>
+</body>
+</html>

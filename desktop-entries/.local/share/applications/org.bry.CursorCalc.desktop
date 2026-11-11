@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Cursor Calculator
+Comment=Live calculations and algebra beside your cursor, with Noctalia colors
+Exec=/home/bry/.local/bin/cursor-calculator
+Icon=accessories-calculator
+Terminal=false
+Categories=Utility;Calculator;
+Keywords=math;calculate;calculator;
+StartupWMClass=org.bry.CursorCalc
+StartupNotify=false

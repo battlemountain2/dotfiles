@@ -1,0 +1,12 @@
+[Unit]
+Description=OBS Unified Overlays Server
+After=default.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /home/bry/.config/obs-overlays/server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=default.target

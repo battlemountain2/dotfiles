@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=FL Studio 2026
+GenericName=Digital Audio Workstation
+Comment=FL Studio 2026 (Rock-Solid Contained Desktop)
+Exec=/home/bry/.local/share/fl-studio-cachyos/launch-fl-studio-contained
+Icon=1010_FL64.0
+Terminal=false
+Categories=AudioVideo;Audio;Midi;Sequencer;
+StartupNotify=true
+StartupWMClass=fl64.exe

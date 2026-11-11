@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Now Playing Overlay</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="widget" class="widget hidden">
+    <div class="glass-container">
+      <div class="art-wrapper">
+        <img id="album-art" src="" alt="Art" class="art-img">
+        <div id="art-placeholder" class="art-placeholder">
+          <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+            <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+          </svg>
+        </div>
+      </div>
+      
+      <div class="info-section">
+        <div class="header-row">
+          <div class="track-artist-wrapper">
+            <div class="track-artist" id="track-artist">—</div>
+          </div>
+          <div class="header-right">
+            <div class="eq-bars paused" id="eq-bars">
+              <span class="bar bar-1"></span>
+              <span class="bar bar-2"></span>
+              <span class="bar bar-3"></span>
+            </div>
+            <div class="time-label" id="time-display">0:00 / 0:00</div>
+          </div>
+        </div>
+
+        <div class="track-title-wrapper" id="title-wrapper">
+          <div class="track-title" id="track-title">Waiting for music...</div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progress-fill"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

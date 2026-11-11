@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stream Ticker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="ticker-pill" id="ticker-pill">
+    <div class="ticker-item">
+      <span class="icon heart">♥</span>
+      <span class="label">follower:</span>
+      <span class="val" id="val-follower">none yet</span>
+    </div>
+    <div class="divider">•</div>
+    <div class="ticker-item">
+      <span class="icon star">★</span>
+      <span class="label">sub:</span>
+      <span class="val" id="val-sub">none yet</span>
+    </div>
+    <div class="divider" id="goal-divider">•</div>
+    <div class="ticker-item" id="goal-item">
+      <span class="icon goal">◎</span>
+      <span class="label">goal:</span>
+      <span class="val" id="val-goal">0 / 10</span>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

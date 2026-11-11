@@ -1,0 +1,179 @@
+[ColorEffects:Disabled]
+ChangeSelectionColor=
+Color=9,15,16
+ColorAmount=0
+ColorEffect=0
+ContrastAmount=0.65
+ContrastEffect=1
+Enable=
+IntensityAmount=0.1
+IntensityEffect=2
+
+[ColorEffects:Inactive]
+ChangeSelectionColor=true
+Color=63,72,74
+ColorAmount=0.025
+ColorEffect=2
+ContrastAmount=0.1
+ContrastEffect=2
+Enable=false
+IntensityAmount=0
+IntensityEffect=0
+
+[Colors:Button]
+BackgroundAlternate=23,29,30
+BackgroundNormal=37,43,44
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:Complementary]
+BackgroundAlternate=23,29,30
+BackgroundNormal=14,20,22
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=160,239,255
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:Header]
+BackgroundAlternate=14,20,22
+BackgroundNormal=27,33,34
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:Header][Inactive]
+BackgroundAlternate=27,33,34
+BackgroundNormal=14,20,22
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:Selection]
+BackgroundAlternate=23,29,30
+BackgroundNormal=130,211,227
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=0,54,62
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=147,0,10
+ForegroundNeutral=60,70,101
+ForegroundNormal=0,54,62
+ForegroundPositive=60,70,101
+ForegroundVisited=205,231,237
+
+[Colors:Tooltip]
+BackgroundAlternate=14,20,22
+BackgroundNormal=27,33,34
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:View]
+BackgroundAlternate=27,33,34
+BackgroundNormal=14,20,22
+DecorationFocus=160,239,255
+DecorationHover=0,54,62
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[Colors:Window]
+BackgroundAlternate=0,78,89
+BackgroundNormal=27,33,34
+DecorationFocus=130,211,227
+DecorationHover=130,211,227
+ForegroundActive=130,211,227
+ForegroundInactive=191,200,202
+ForegroundLink=177,203,209
+ForegroundNegative=255,180,171
+ForegroundNeutral=188,197,235
+ForegroundNormal=222,227,229
+ForegroundPositive=188,197,235
+ForegroundVisited=205,231,237
+
+[General]
+ColorScheme=noctalia
+ColorSchemeHash=df214be037bfd0ece31e079ffb961248e4c678cf
+Name=noctalia
+TerminalApplication=kitty
+font=Geist,10,-1,5,300,0,0,0,0,0,0,0,0,0,0,1
+widgetStyle=Breeze
+
+[Icons]
+Theme=breeze-dark
+
+[KDE]
+contrast=4
+frameContrast=0.2
+widgetStyle=Breeze
+
+[KFileDialog Settings]
+Allow Expansion=true
+Automatically select filename extension=false
+Breadcrumb Navigation=false
+Decoration position=2
+Preview Width=299
+Show Full Path=false
+Show Inline Previews=true
+Show Preview=false
+Show Speedbar=true
+Show hidden files=false
+Sort by=Date
+Sort directories first=true
+Sort hidden files last=false
+Sort reversed=true
+Speedbar Width=154
+View Style=DetailTree
+
+[PreviewSettings]
+EnableRemoteFolderThumbnail=false
+MaximumRemoteSize=0
+
+[WM]
+activeBackground=0,78,89
+activeBlend=160,239,255
+activeForeground=160,239,255
+inactiveBackground=14,20,22
+inactiveBlend=191,200,202
+inactiveForeground=191,200,202

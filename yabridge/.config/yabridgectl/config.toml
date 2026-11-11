@@ -1,0 +1,13 @@
+plugin_dirs = [
+    '/home/bry/.wine/drive_c/Program Files/Common Files/CLAP',
+    '/home/bry/.wine/drive_c/Program Files/Common Files/VST3',
+    '/home/bry/.wine/drive_c/Program Files/VSTPlugins',
+    '/home/bry/.wine/drive_c/Program Files (x86)/VSTPlugins',
+]
+vst2_location = 'centralized'
+no_verify = false
+blacklist = []
+
+[last_known_config]
+wine_version = 'wine-11.21'
+yabridge_host_hash = 4279222400525443423

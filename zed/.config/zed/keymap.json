@@ -1,0 +1,10 @@
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      "f5": ["task::Spawn", { "task_name": "Run Python File" }],
+      "f6": ["task::Spawn", { "task_name": "Open IPython REPL" }],
+      "ctrl-alt-p": ["task::Spawn", { "task_name": "Open IPython REPL" }]
+    }
+  }
+]

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=TV Remote
+Comment=Keyboard remote for the living room TV
+Exec=kitty --title "TV Remote" -o initial_window_width=100c -o initial_window_height=36c /home/bry/.local/bin/tv remote
+Icon=video-television
+Terminal=false
+Categories=AudioVideo;
+Keywords=TV;Onn;Remote;

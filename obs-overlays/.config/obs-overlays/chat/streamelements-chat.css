@@ -1,0 +1,53 @@
+/* ==========================================================
+   Style B - Cozy Monospace / Streamer Discord Chat for StreamElements
+   Paste this into the 'Custom CSS' field of your widget
+   ========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+* {
+  box-sizing: border-box;
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+html, body {
+  background-color: transparent !important;
+  overflow: hidden;
+}
+
+#log>div {
+  margin-bottom: 4px !important;
+  background: rgba(15, 18, 24, 0.68) !important;
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-radius: 6px !important;
+  padding: 5px 9px !important;
+  font-size: 13px !important;
+  line-height: 1.45 !important;
+  color: #f1f5f9 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.95) !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+  animation: fadeIn 0.22s ease-out forwards !important;
+}
+
+.meta {
+  font-weight: 700 !important;
+  margin-right: 4px !important;
+}
+
+.badge {
+  border-radius: 3px !important;
+  margin-right: 4px !important;
+  vertical-align: baseline !important;
+  padding: 1px 4px !important;
+}
+
+.message {
+  font-weight: 400 !important;
+  word-break: break-word !important;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}

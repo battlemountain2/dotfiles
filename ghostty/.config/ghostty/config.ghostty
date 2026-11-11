@@ -1,0 +1,59 @@
+# ==============================================================================
+# GHOSTTY CONFIGURATION (Matched to your Kitty setup)
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Visuals & Window Styling
+# ------------------------------------------------------------------------------
+theme = noctalia
+background-opacity = 0.88
+background-blur = true
+window-padding-x = 20
+window-padding-y = 20
+window-padding-balance = true
+
+# ------------------------------------------------------------------------------
+# Fonts
+# ------------------------------------------------------------------------------
+font-family = "Maple Mono NF"
+font-size = 12
+
+# ------------------------------------------------------------------------------
+# Cursor & Mouse
+# ------------------------------------------------------------------------------
+cursor-style = block
+cursor-style-blink = false
+mouse-hide-while-typing = true
+
+# Right-click pastes from clipboard (identical to Kitty)
+right-click-action = paste
+
+# ------------------------------------------------------------------------------
+# Window Behavior & Tabs
+# ------------------------------------------------------------------------------
+confirm-close-surface = false
+scrollback-limit-lines = 10000
+
+# Initial Window Dimensions (105 columns x 35 rows)
+window-width = 105
+window-height = 35
+
+# Tab Bar (placed at the bottom like Kitty's tab_bar_edge bottom)
+gtk-tabs-location = bottom
+window-show-tab-bar = auto
+gtk-wide-tabs = true
+
+# ------------------------------------------------------------------------------
+# Key Bindings (Kitty Muscle Memory)
+# ------------------------------------------------------------------------------
+# Clipboard
+keybind = ctrl+v=paste_from_clipboard
+
+# Tab management
+keybind = ctrl+shift+t=new_tab
+keybind = ctrl+shift+q=close_tab:this
+keybind = ctrl+shift+arrow_right=next_tab
+keybind = ctrl+shift+arrow_left=previous_tab
+
+# Config Reload
+keybind = ctrl+shift+r=reload_config

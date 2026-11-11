@@ -1,0 +1,62 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+  "prettier": {
+    "allowed": true
+  },
+  "languages": {
+    "Python": {
+      "prettier": {
+        "allowed": true
+      },
+      "inlay_hints": {
+        "show_background": true,
+        "enabled": true
+      }
+    }
+  },
+  "cli_default_open_behavior": "existing_window",
+  "proxy": "",
+  "use_smartcase_search": true,
+  "diagnostics": {
+    "inline": {
+      "enabled": true
+    }
+  },
+  "ui_font_family": "Inter Display",
+  "buffer_font_family": "JetBrainsMono Nerd Font Mono",
+  "icon_theme": "Zed (Default)",
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "system",
+    "light": "Noctalia Light Transparent",
+    "dark": "Noctalia Dark Transparent"
+  },
+  "terminal": {
+    "font_family": "JetBrainsMono Nerd Font Mono",
+    "dock": "bottom",
+    "default_height": 320
+  },
+  "autosave": "on_focus_change",
+  "context_servers": {
+    "obsidian": {
+      "command": {
+        "path": "/usr/bin/python3",
+        "args": ["/home/bry/notes/scripts/obsidian_mcp.py"]
+      }
+    },
+    "musiccraft": {
+      "command": {
+        "path": "/home/bry/Projects/musiccraft/target/release/musiccraft-mcp",
+        "args": []
+      }
+    }
+  }
+}

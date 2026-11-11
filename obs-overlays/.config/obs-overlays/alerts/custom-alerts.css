@@ -1,0 +1,45 @@
+/* ==========================================================
+   JetBrains Mono Minimal Alerts for StreamElements / Streamlabs
+   (Followers, Subs, Bits, Raids, Tips)
+   Paste this into the 'Custom CSS' field of your Alertbox
+   ========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700;800&display=swap');
+
+* {
+  font-family: 'JetBrains Mono', monospace !important;
+}
+
+#alert-box {
+  background: transparent !important;
+}
+
+/* Alert Container Pill */
+#alert-text-wrap {
+  background: rgba(18, 22, 20, 0.82) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(163, 190, 140, 0.3) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px -2px rgba(163, 190, 140, 0.35) !important;
+  border-radius: 16px !important;
+  padding: 14px 24px !important;
+  display: inline-block !important;
+}
+
+#alert-text {
+  font-size: 18px !important;
+  color: #eceff4 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Highlighted username */
+#alert-user, strong {
+  color: #a3be8c !important;
+  font-weight: 800 !important;
+  text-shadow: 0 0 8px rgba(163, 190, 140, 0.4) !important;
+}
+
+#alert-message {
+  font-size: 13px !important;
+  color: #8892b0 !important;
+  margin-top: 4px !important;
+}
