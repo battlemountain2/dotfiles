@@ -1,8 +1,14 @@
 -- Input configuration
 
 hl.config({
-    cursor = { no_warps = true, zoom_detached_camera = false, zoom_rigid = false, zoom_disable_aa = true },
-    scrolling = { follow_focus = false },
+    cursor = { enable_hyprcursor = false, no_warps = true, zoom_detached_camera = false, zoom_rigid = false, zoom_disable_aa = true },
+    scrolling = {
+        follow_focus = true,
+        -- Clicks and keyboard focus scroll; merely hovering does not.
+        follow_min_visible = 1.0,
+        focus_fit_method = 1, -- Fit into view without centering gaps.
+        wrap_focus = false, -- Stop at the ends of the carousel.
+    },
     input = {
         -- Focus on hover across all windows
         follow_mouse = 1,

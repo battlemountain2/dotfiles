@@ -1,0 +1,241 @@
+#!/usr/bin/env python3
+"""
+clip-tools: CLI helper for Noctalia launcher, clip compression, GPU stats, and maintenance.
+"""
+import sys
+import os
+import subprocess
+import json
+import time
+from pathlib import Path
+
+VIDEO_DIRS = [
+    os.path.expanduser("~/Videos/Recordings"),
+    os.path.expanduser("~/Videos")
+]
+
+def format_size(bytes_size):
+    for unit in ['B', 'KB', 'MB', 'GB']:
+        if bytes_size < 1024.0:
+            return f"{bytes_size:.1f} {unit}" if unit != 'B' else f"{int(bytes_size)} B"
+        bytes_size /= 1024.0
+    return f"{bytes_size:.1f} TB"
+
+def format_time_ago(mtime):
+    diff = time.time() - mtime
+    if diff < 60:
+        return "Just now"
+    elif diff < 3600:
+        return f"{int(diff // 60)}m ago"
+    elif diff < 86400:
+        return f"{int(diff // 3600)}h ago"
+    elif diff < 172800:
+        return "Yesterday"
+    else:
+        return f"{int(diff // 86400)}d ago"
+
+def get_video_duration(path):
+    try:
+        cmd = [
+            "ffprobe", "-v", "error", "-show_entries", "format=duration",
+            "-of", "default=noprint_wrappers=1:nokey=1", path
+        ]
+        out = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL).strip()
+        sec = float(out)
+        mins = int(sec // 60)
+        secs = int(sec % 60)
+        return f"{mins}:{secs:02d}", sec
+    except Exception:
+        return "Unknown", 0.0
+
+def find_clips(max_count=15):
+    clips = []
+    seen = set()
+    for vdir in VIDEO_DIRS:
+        if not os.path.isdir(vdir):
+            continue
+        try:
+            for entry in os.scandir(vdir):
+                if entry.is_file() and not entry.name.startswith('.'):
+                    name_lower = entry.name.lower()
+                    if name_lower.endswith(('.mp4', '.mkv', '.mov', '.webm')):
+                        # Focus on clips / replays / recordings
+                        real_path = os.path.realpath(entry.path)
+                        if real_path in seen:
+                            continue
+                        seen.add(real_path)
+                        stat = entry.stat()
+                        clips.append({
+                            "path": entry.path,
+                            "filename": entry.name,
+                            "size": format_size(stat.st_size),
+                            "bytes": stat.st_size,
+                            "time_ago": format_time_ago(stat.st_mtime),
+                            "mtime": stat.st_mtime
+                        })
+        except Exception:
+            pass
+
+    clips.sort(key=lambda x: x["mtime"], reverse=True)
+    return clips[:max_count]
+
+def cmd_list():
+    clips = find_clips(15)
+    # Add duration for top 6 items to keep response snappy
+    for c in clips[:6]:
+        dur_str, _ = get_video_duration(c["path"])
+        c["duration"] = dur_str
+    print(json.dumps(clips))
+
+def cmd_latest_clip():
+    clips = find_clips(1)
+    if not clips:
+        print(json.dumps({}))
+    else:
+        print(json.dumps(clips[0]))
+
+def cmd_compress_latest():
+    clips = find_clips(1)
+    if not clips:
+        subprocess.run(["notify-send", "-a", "Clip Share", "-u", "critical", "-i", "video-x-generic", "No Clips Found", "No gameplay clips found in ~/Videos to compress."])
+        return
+
+    latest = clips[0]
+    src_path = latest["path"]
+    filename = latest["filename"]
+    dur_str, duration = get_video_duration(src_path)
+    if duration <= 0:
+        duration = 60.0
+
+    target_mb = 23.5  # Safe Discord limit
+    target_kbits = target_mb * 8192
+    audio_kbits = 128
+    video_kbits = max(300, int((target_kbits / duration) - audio_kbits))
+
+    out_path = "/tmp/discord_clip.mp4"
+    subprocess.run(["notify-send", "-a", "Clip Share", "-i", "video-x-generic", "Compressing Clip for Discord...", f"Optimizing {filename} to <24MB ({dur_str})"])
+
+    # Fast NVENC 1-pass/2-pass compression
+    cmd = [
+        "ffmpeg", "-y", "-i", src_path,
+        "-c:v", "h264_nvenc",
+        "-b:v", f"{video_kbits}k",
+        "-maxrate", f"{int(video_kbits * 1.2)}k",
+        "-bufsize", f"{int(video_kbits * 2)}k",
+        "-preset", "p4",
+        "-c:a", "aac",
+        "-b:a", "128k",
+        "-movflags", "+faststart",
+        out_path
+    ]
+
+    try:
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except subprocess.CalledProcessError:
+        # Fallback to libx264 if NVENC busy
+        cmd[cmd.index("h264_nvenc")] = "libx264"
+        cmd[cmd.index("-preset")] = "-preset"
+        cmd[cmd.index("p4")] = "fast"
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+    out_size = format_size(os.path.getsize(out_path))
+    # Copy file URI to clipboard for instant Ctrl+V into Discord / File managers
+    try:
+        subprocess.run(["wl-copy", "-t", "text/uri-list", f"file://{out_path}"], check=True)
+    except Exception:
+        pass
+
+    subprocess.run([
+        "notify-send", "-a", "Clip Share",
+        "-i", "checkbox",
+        "Clip Ready for Discord!",
+        f"{out_size} • Copied to clipboard! Press Ctrl+V in Discord to send."
+    ])
+
+def cmd_clean(days=14):
+    cutoff = time.time() - (days * 86400)
+    freed_bytes = 0
+    removed_count = 0
+
+    for vdir in VIDEO_DIRS:
+        if not os.path.isdir(vdir):
+            continue
+        try:
+            for entry in os.scandir(vdir):
+                if entry.is_file() and entry.name.lower().endswith(('.mp4', '.mkv', '.mov', '.webm')):
+                    # Only target recordings and replays
+                    if entry.name.startswith(('Replay_', 'recording_', 'Video_')):
+                        stat = entry.stat()
+                        if stat.st_mtime < cutoff:
+                            freed_bytes += stat.st_size
+                            os.remove(entry.path)
+                            removed_count += 1
+        except Exception:
+            pass
+
+    size_str = format_size(freed_bytes)
+    res = {
+        "removed_count": removed_count,
+        "freed_bytes": freed_bytes,
+        "freed_size": size_str,
+        "days": days
+    }
+    print(json.dumps(res))
+    subprocess.run([
+        "notify-send", "-a", "Storage Clean",
+        "-i", "edit-clear",
+        "Clips Cleaned",
+        f"Removed {removed_count} clips older than {days} days ({size_str} freed)."
+    ])
+
+def cmd_gpu_stats():
+    try:
+        cmd = [
+            "nvidia-smi",
+            "--query-gpu=temperature.gpu,utilization.gpu,memory.used,memory.total,power.draw,fan.speed",
+            "--format=csv,noheader,nounits"
+        ]
+        out = subprocess.check_output(cmd, text=True, stderr=subprocess.DEVNULL).strip()
+        parts = [p.strip() for p in out.split(',')]
+        temp = parts[0]
+        util = parts[1]
+        mem_used = int(parts[2])
+        mem_total = int(parts[3])
+        power = float(parts[4])
+        fan = parts[5]
+
+        used_gb = mem_used / 1024.0
+        total_gb = mem_total / 1024.0
+        mem_pct = round((mem_used / mem_total) * 100)
+
+        data = {
+            "name": "NVIDIA GeForce RTX 4070 Super",
+            "temp": f"{temp}°C",
+            "util": f"{util}%",
+            "vram_used": f"{used_gb:.1f} GB",
+            "vram_total": f"{total_gb:.1f} GB",
+            "vram_pct": f"{mem_pct}%",
+            "power": f"{power:.0f} W",
+            "fan": f"{fan}%",
+            "summary": f"{temp}°C • VRAM: {used_gb:.1f}/{total_gb:.1f} GB ({mem_pct}%) • GPU: {util}% • {power:.0f}W • Fan {fan}%"
+        }
+        print(json.dumps(data))
+    except Exception as e:
+        print(json.dumps({"error": str(e), "summary": "GPU Stats Unavailable"}))
+
+if __name__ == "__main__":
+    subcmd = sys.argv[1] if len(sys.argv) > 1 else "list"
+    if subcmd == "list":
+        cmd_list()
+    elif subcmd == "latest":
+        cmd_latest_clip()
+    elif subcmd == "compress-latest":
+        cmd_compress_latest()
+    elif subcmd == "clean":
+        days = int(sys.argv[2]) if len(sys.argv) > 2 else 14
+        cmd_clean(days)
+    elif subcmd == "gpu-stats":
+        cmd_gpu_stats()
+    else:
+        print(f"Unknown command: {subcmd}")
+        sys.exit(1)

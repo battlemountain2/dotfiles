@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /home/bry/.local/share/noctalia-cursor-calculator/bin/cursor-calculator-rust "$@"

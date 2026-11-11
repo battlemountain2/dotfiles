@@ -1,8 +1,8 @@
 -- Hyprland default apps
 
-TERMINAL     = "kitty"
+TERMINAL     = "ghostty"
 FILE_MANAGER = "dolphin"
-BROWSER      = "zen-browser"
+BROWSER      = "helium-browser"
 EDITOR       = "zeditor"
 CALCULATOR   = "gnome-calculator"
 

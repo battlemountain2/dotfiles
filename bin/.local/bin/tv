@@ -1,19 +1,21 @@
 #!/usr/bin/env python3
 """
 tv & movie CLI for Onn TV 4K Pro (Android TV) + LG TV.
-Usage:
-  tv on                  - Power on TV (Wake-on-LAN + HDMI-CEC wakeup)
-  tv off                 - Power off / sleep TV (KEYCODE_SLEEP)
-  tv status              - Check TV connection status
-  tv launch <app>        - Launch app (paramount, netflix, hbo, yt, stremio, etc.)
-  tv play [query]        - Search & open TV show in Stremio
-  movie [play] [query]   - Search & open movie in Stremio
+Run tv --help for commands or tv remote for the interactive keyboard remote.
 """
 
-import sys
+import curses
+import importlib.util
 import os
+from pathlib import Path
+import re
+import shlex
+import shutil
 import socket
 import subprocess
+import sys
+import time
+from types import SimpleNamespace
 import urllib.parse
 
 TV_IP = "10.0.0.108"
@@ -55,7 +57,67 @@ APPS = {
     "tubi": ("Tubi", "com.tubitv"),
 }
 
-_tv_already_turned_on = False
+SCRIPT = str(Path(__file__).resolve())
+TIMER = "tv-sleep"
+KEYS = {
+    "pause": "MEDIA_PAUSE", "resume": "MEDIA_PLAY", "toggle": "MEDIA_PLAY_PAUSE",
+    "stop": "MEDIA_STOP", "next": "MEDIA_NEXT", "previous": "MEDIA_PREVIOUS",
+    "forward": "MEDIA_FAST_FORWARD", "rewind": "MEDIA_REWIND",
+    "home": "HOME", "back": "BACK", "up": "DPAD_UP", "down": "DPAD_DOWN",
+    "left": "DPAD_LEFT", "right": "DPAD_RIGHT", "ok": "DPAD_CENTER",
+    "mute": "VOLUME_MUTE", "volume-up": "VOLUME_UP", "volume-down": "VOLUME_DOWN",
+    "on": "WAKEUP", "off": "SLEEP",
+}
+HELP = """TV remote for your Onn streamer and LG display
+
+  tv on / off                  Wake / sleep (HDMI-CEC controls the display)
+  tv status                    Connection and streamer power state
+  tv doctor                    Connection, authorization, and local setup checks
+  tv now                       Foreground app and available media session details
+  tv remote                    Interactive mouse/keyboard remote (q to exit)
+  tv menu                      Noctalia app and action picker
+  tv pause / resume / toggle    Playback controls
+  tv stop / next / previous     Stop or change track
+  tv forward / rewind          Seek, when supported by the app
+  tv volume up [1-20]           Raise volume by a number of key presses
+  tv volume down [1-20]         Lower volume
+  tv mute                      Toggle mute
+  tv home / back / ok           Navigate
+  tv up / down / left / right   Move focus
+  tv sleep 30m                  Schedule sleep (also accepts 1h30m or 90s)
+  tv sleep status / cancel     Inspect or cancel the sleep timer
+  tv launch <app>              Launch a streaming app (tv netflix also works)
+  tv play <title>               Open a Stremio search
+  movie <title>                Open a Stremio movie search
+
+Playback and volume depend on the app and HDMI-CEC configuration.
+The sleep timer runs on this PC and needs it awake and connected to the TV.
+"""
+
+
+class TVError(Exception):
+    pass
+
+
+def run(command, timeout=6, **kwargs):
+    try:
+        return subprocess.run(command, capture_output=True, text=True, timeout=timeout, **kwargs)
+    except FileNotFoundError:
+        raise TVError(f"Required program not found: {command[0]}") from None
+    except subprocess.TimeoutExpired:
+        raise TVError(f"Timed out waiting for {command[0]}") from None
+
+
+def clean(text):
+    return "".join(c for c in text if c.isprintable())
+
+
+def notify(title, message):
+    if shutil.which("notify-send"):
+        try:
+            run(["notify-send", "-a", "TV", "-i", "video-television", title, message])
+        except TVError:
+            pass
 
 
 def send_wol(mac: str):
@@ -74,137 +136,221 @@ def adb_cmd(*args, timeout=5):
     """Run an adb command targeting the TV."""
     cmd = [ADB_BIN, "-s", TV_ADDR] + list(args)
     try:
-        res = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        res = run(cmd, timeout=timeout)
         return res.returncode == 0, res.stdout.strip(), res.stderr.strip()
-    except subprocess.TimeoutExpired:
-        return False, "", "Timed out"
-    except Exception as e:
+    except TVError as e:
         return False, "", str(e)
 
 
-def ensure_connected():
-    """Ensure ADB is connected to the Onn TV."""
-    try:
-        subprocess.run([ADB_BIN, "connect", TV_ADDR], capture_output=True, timeout=4)
-    except Exception:
-        pass
+def device_state():
+    result = run([ADB_BIN, "devices"])
+    if result.returncode:
+        raise TVError(result.stderr.strip() or "Could not list ADB devices")
+    for line in result.stdout.splitlines():
+        fields = line.split()
+        if len(fields) >= 2 and fields[0] == TV_ADDR:
+            return fields[1]
+    return "disconnected"
+
+
+def authorization_error():
+    return TVError("TV needs authorization. On the Onn screen, accept 'Allow USB debugging' "
+                   "and select 'Always allow from this computer'. If no prompt appears, "
+                   "toggle USB debugging in Developer options, then run 'tv doctor'.")
+
+
+def ensure_connected(wait=6):
+    """Retry discovery and shell readiness within a bounded wake-up window."""
+    deadline = time.monotonic() + wait
+    last_error = "TV is offline"
+    while True:
+        state = device_state()
+        if state == "unauthorized":
+            raise authorization_error()
+        if state == "device":
+            ok, _, error = adb_cmd("shell", "true", timeout=2)
+            if ok:
+                return
+            if "unauthorized" in error.lower():
+                raise authorization_error()
+            last_error = error
+        else:
+            result = run([ADB_BIN, "connect", TV_ADDR], timeout=4)
+            last_error = result.stderr.strip() or result.stdout.strip() or state
+            if "authenticate" in last_error.lower() or "unauthorized" in last_error.lower():
+                raise authorization_error()
+        if time.monotonic() >= deadline:
+            raise TVError(f"Cannot reach TV at {TV_ADDR}: {clean(last_error)}. "
+                          "Check its power and network, then run 'tv doctor'.")
+        time.sleep(0.5)
+
+
+def shell(*args, timeout=6):
+    # ADB joins shell arguments remotely, so quote each argument for Android's shell.
+    ok, out, err = adb_cmd("shell", shlex.join(args), timeout=timeout)
+    if not ok:
+        if "unauthorized" in (err + out).lower():
+            raise authorization_error()
+        raise TVError(clean(err or out) or "TV command failed")
+    return "\n".join(part for part in (out, err) if part)
+
+
+def send_key(action, count=1):
+    shell("input", "keyevent", *(["KEYCODE_" + KEYS[action]] * count))
+
+
+def cmd_key(action, count=1):
+    ensure_connected()
+    send_key(action, count)
+    print(f"Sent {action.replace('-', ' ')}" + (f" ({count} presses)" if count != 1 else ""))
 
 
 def cmd_on(quiet=False):
     """Turns on the TV via Wake-on-LAN and sends KEYCODE_WAKEUP via ADB."""
-    global _tv_already_turned_on
-    if _tv_already_turned_on:
-        return
-
     if not quiet:
         print("Turning on TV...")
     for mac in MACS:
         send_wol(mac)
-    ensure_connected()
-    # 224 = KEYCODE_WAKEUP (wakes screen & triggers HDMI-CEC TV power-on)
-    ok, stdout, stderr = adb_cmd("shell", "input", "keyevent", "224")
-    _tv_already_turned_on = True
+    ensure_connected(wait=15)
+    send_key("on")
+    # Give Android time to resume before a following app launch.
+    deadline = time.monotonic() + 8
+    while power_state() != "Awake":
+        if time.monotonic() >= deadline:
+            raise TVError("Wake command sent, but the streamer has not reported Awake yet.")
+        time.sleep(0.5)
     if not quiet:
-        if ok:
-            print("✓ TV turned on (WAKEUP sent via ADB)")
-        else:
-            print("✓ Wake-on-LAN packet sent to TV")
+        print("TV streamer awake; HDMI-CEC wake command sent to display.")
 
 
 def cmd_off():
     print("Turning off TV...")
     ensure_connected()
-    # 223 = KEYCODE_SLEEP
-    ok, stdout, stderr = adb_cmd("shell", "input", "keyevent", "223")
-    if ok:
-        print("✓ TV put to sleep")
-    else:
-        print(f"Failed to send sleep command: {stderr}", file=sys.stderr)
+    send_key("off")
+    print("Sleep command sent.")
+
+
+def power_state():
+    match = re.search(r"mWakefulness=(\w+)", shell("dumpsys", "power"))
+    return match[1] if match else "unknown"
 
 
 def cmd_status():
     ensure_connected()
-    res = subprocess.run([ADB_BIN, "devices"], capture_output=True, text=True)
-    lines = res.stdout.strip().splitlines()
-    found = False
-    for line in lines[1:]:
-        if TV_IP in line:
-            found = True
-            state = line.split()[-1]
-            print(f"TV at {TV_ADDR}: {state}")
-            if state == "unauthorized":
-                print("\n⚠️  Please check your TV screen and accept the 'Allow USB debugging' prompt!")
-    if not found:
-        print(f"TV at {TV_ADDR} is currently offline or unreachable.")
+    print(f"TV at {TV_ADDR}: connected and authorized")
+    print(f"Streamer: {power_state()} (display power depends on HDMI-CEC)")
+    sleep_timer(["status"])
+
+
+def cmd_doctor():
+    print(f"ADB: {shutil.which(ADB_BIN) or ADB_BIN}")
+    print(f"Target: {TV_ADDR}")
+    key = Path.home() / ".android" / "adbkey"
+    print(f"Default ADB key: {'present' if key.is_file() else 'missing'}")
+    if os.environ.get("ADB_VENDOR_KEYS"):
+        print("ADB_VENDOR_KEYS: custom key paths configured")
+    cmd_status()
+    print("ADB shell is ready. No key regeneration or server restart needed.")
+
+
+def app_name(package):
+    return next((name for name, pkg in APPS.values() if pkg == package), package)
+
+
+def parse_media(text, foreground):
+    sessions = []
+    for block in re.split(r"(?=^\s+ownerPid=)", text, flags=re.M):
+        pkg = re.search(r"^\s+package=([\w.]+)", block, re.M)
+        if not pkg:
+            continue
+        state = re.search(r"state=PlaybackState \{state=(\w+)(?:\((\d+)\))?", block)
+        active = bool(re.search(r"^\s+active=true$", block, re.M))
+        if not active:
+            continue
+        sessions.append({"package": pkg[1], "state": state[1] if state else "unknown",
+                         "block": block})
+    if not sessions:
+        return None
+    return max(sessions, key=lambda s: (s["state"] in ("PLAYING", "3"),
+                                        s["package"] == foreground))
+
+
+def cmd_now():
+    ensure_connected()
+    state = power_state()
+    print(f"Streamer: {state}")
+    if state == "Asleep":
+        print("No current viewing session while the streamer is asleep.")
+        return
+    activities = shell("dumpsys", "activity", "activities")
+    foreground = None
+    for pattern in (r"topResumedActivity=.*?\bu\d+ ([\w.]+)/",
+                    r"mResumedActivity:.*?\bu\d+ ([\w.]+)/"):
+        match = re.search(pattern, activities)
+        if match:
+            foreground = match[1]
+            break
+    if not foreground:
+        focus = shell("dumpsys", "window", "windows")
+        match = re.search(r"mCurrentFocus=.*?\bu\d+ ([\w.]+)/", focus)
+        foreground = match[1] if match else None
+    print(f"Foreground app: {app_name(foreground) if foreground else 'unavailable'}")
+    session = parse_media(shell("dumpsys", "media_session"), foreground)
+    if not session:
+        print("No active media session reported by the apps.")
+        return
+    states = {"0": "none", "1": "stopped", "2": "paused", "3": "playing",
+              "6": "buffering", "7": "error", "8": "connecting"}
+    playback = states.get(session["state"], session["state"].lower())
+    print(f"Media: {app_name(session['package'])} ({playback})")
+    for field, label in (("TITLE", "Title"), ("ARTIST", "Artist"), ("ALBUM", "Album")):
+        match = re.search(r"android\.media\.metadata\." + field + r"=([^,}\n]+)", session["block"])
+        if match:
+            print(f"{label}: {clean(match[1])}")
+    description = re.search(r"metadata:.*?description=(.+)", session["block"])
+    if description:
+        print(f"Details: {clean(description[1])}")
 
 
 def cmd_launch(target: str):
-    # Automatically turn on the TV whenever a launch command is invoked
-    cmd_on()
-
     if not target:
         print("\nAvailable apps to launch:")
         for name in ["paramount", "netflix", "hbo", "yt (SmartTube)", "stremio", "disney", "hulu", "prime", "twitch", "crunchyroll"]:
             print(f"  - {name}")
         try:
             target = input("\nEnter app to launch: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\nCanceled.")
+        except EOFError:
             return
 
     key = target.lower().strip()
     entry = APPS.get(key)
     if not entry:
-        for k, v in APPS.items():
-            if key in k:
-                entry = v
-                break
+        raise TVError(f"Unknown app: {target}. Options: {', '.join(dict.fromkeys(n for n, _ in APPS.values()))}")
 
-    if not entry:
-        print(f"Unknown app: '{target}'.")
-        print(f"Supported apps: {', '.join(sorted(set(k for k in APPS.keys() if len(k) > 2)))}")
-        return
-
+    cmd_on(quiet=True)
     display_name, pkg = entry
     print(f"Launching {display_name} on TV...")
 
     # Launch app via monkey (reliable across leanback and main activities)
-    ok, out, err = adb_cmd("shell", "monkey", "-p", pkg, "-c", "android.intent.category.LAUNCHER", "1")
-    if not ok:
-        ok, out, err = adb_cmd("shell", "monkey", "-p", pkg, "1")
-
-    if ok:
-        print(f"✓ Launched {display_name}")
-        try:
-            subprocess.run([
-                "notify-send",
-                "-a", "TV",
-                "-i", "video-television",
-                f"TV: {display_name}",
-                f"Launched on Onn TV 4K Pro"
-            ], capture_output=True)
-        except Exception:
-            pass
-    else:
-        print(f"Failed to launch {display_name}: {err or out}", file=sys.stderr)
+    out = shell("monkey", "-p", pkg, "1", timeout=10)
+    if "Events injected: 1" not in out:
+        raise TVError(f"Could not launch {display_name}: {clean(out)}")
+    print(f"Launched {display_name}")
+    notify(f"TV: {display_name}", "Application launched on the Onn TV")
 
 
 def cmd_play(query: str, media_type: str = "title"):
-    # Automatically turn on the TV immediately
-    cmd_on()
-
     if not query:
         prompt_text = f"Enter {media_type} to search on Stremio: "
         try:
             query = input(prompt_text).strip()
-        except (KeyboardInterrupt, EOFError):
-            print("\nCanceled.")
+        except EOFError:
             return
 
     if not query:
-        print("No search query provided.")
         return
 
+    cmd_on(quiet=True)
     print(f"Searching Stremio for '{query}' on TV...")
 
     encoded = urllib.parse.quote(query)
@@ -212,51 +358,135 @@ def cmd_play(query: str, media_type: str = "title"):
 
     # Send intent directly to Stremio TV MainActivity
     cmd_args = [
-        "shell", "am", "start",
+        "am", "start",
         "-n", "com.stremio.one/com.stremio.tv.MainActivity",
         "-a", "android.intent.action.VIEW",
         "-d", deep_link
     ]
-    ok, out, err = adb_cmd(*cmd_args)
-    if ok:
-        print(f"✓ Opened Stremio search for '{query}' on TV")
-        try:
-            subprocess.run([
-                "notify-send",
-                "-a", "Stremio",
-                "-i", "video-television",
-                f"Playing on TV: {query}",
-                f"Launched Stremio search for '{query}'"
-            ], capture_output=True)
-        except Exception:
-            pass
-    else:
-        # Fallback: launch Stremio package directly if deep link fails
-        if "unauthorized" in err or "unauthorized" in out:
-            print("⚠️  TV is waiting for ADB authorization. Please check TV screen and select 'Always allow'.")
+    out = shell(*cmd_args)
+    if re.search(r"Error:|Exception|unable to resolve", out, re.I):
+        raise TVError(f"Stremio could not open the search: {clean(out)}")
+    print(f"Opened Stremio search for '{query}' on TV")
+    notify("TV: Stremio search", f"Search opened for {query}")
+
+
+def duration_seconds(value):
+    if not re.fullmatch(r"(?:\d+[hms])+", value):
+        raise TVError("Use a duration such as 30m, 1h30m, or 90s.")
+    seconds = sum(int(n) * {"h": 3600, "m": 60, "s": 1}[unit]
+                  for n, unit in re.findall(r"(\d+)([hms])", value))
+    if not 1 <= seconds <= 86400:
+        raise TVError("Sleep duration must be between 1 second and 24 hours.")
+    return seconds
+
+
+def sleep_timer(args):
+    if len(args) != 1:
+        raise TVError("Usage: tv sleep <30m|1h30m|status|cancel>")
+    action = args[0].lower()
+    if action == "status":
+        result = run(["systemctl", "--user", "show", TIMER + ".timer",
+                      "-p", "ActiveState", "-p", "NextElapseUSecRealtime", "-p", "LoadState"])
+        if result.returncode:
+            raise TVError(result.stderr.strip() or "Could not read sleep timer status")
+        properties = dict(line.split("=", 1) for line in result.stdout.splitlines() if "=" in line)
+        if properties.get("ActiveState") == "active":
+            print("Sleep timer: scheduled")
+            listing = run(["systemctl", "--user", "list-timers", TIMER + ".timer", "--no-pager"])
+            print(listing.stdout.strip())
         else:
-            print(f"Note: {out or err}")
-            print("Attempting direct package launch...")
-            adb_cmd("shell", "monkey", "-p", "com.stremio.one", "1")
-
-
-def main():
-    script_name = os.path.basename(sys.argv[0])
-    args = sys.argv[1:]
-
-    # If invoked as 'movie'
-    if "movie" in script_name:
-        if args and args[0] == "play":
-            query = " ".join(args[1:])
-            cmd_play(query, media_type="movie")
-        elif args:
-            query = " ".join(args)
-            cmd_play(query, media_type="movie")
-        else:
-            cmd_play("", media_type="movie")
+            print("Sleep timer: none")
         return
+    seconds = None if action == "cancel" else duration_seconds(action)
+    # One timer per TV; replacing a timer first cancels the previous deadline.
+    result = run(["systemctl", "--user", "stop", TIMER + ".timer", TIMER + ".service"])
+    if result.returncode and not all("not loaded" in line for line in result.stderr.splitlines() if line):
+        raise TVError(result.stderr.strip() or "Could not cancel previous sleep timer")
+    run(["systemctl", "--user", "reset-failed", TIMER + ".timer", TIMER + ".service"])
+    if seconds is None:
+        print("Sleep timer canceled.")
+        return
+    result = run(["systemd-run", "--user", "--collect", "--unit=" + TIMER,
+                  f"--on-active={seconds}s", "--timer-property=AccuracySec=1s",
+                  "--description=TV sleep timer", SCRIPT, "off"])
+    if result.returncode:
+        raise TVError(result.stderr.strip() or "Could not schedule sleep timer")
+    print(f"TV sleep scheduled in {action}. Cancel with 'tv sleep cancel'.")
 
-    # Invoked as 'tv'
+
+REMOTE_KEYS = {
+    curses.KEY_UP: "up", curses.KEY_DOWN: "down",
+    curses.KEY_LEFT: "left", curses.KEY_RIGHT: "right",
+    ord("w"): "up", ord("s"): "down", ord("a"): "left", ord("d"): "right",
+    10: "ok", 13: "ok", curses.KEY_ENTER: "ok",
+    ord(" "): "toggle", ord("p"): "pause", ord("r"): "resume",
+    ord("h"): "home", ord("b"): "back", 127: "back", 8: "back", curses.KEY_BACKSPACE: "back",
+    ord("+"): "volume-up", ord("="): "volume-up", ord("-"): "volume-down",
+    ord("m"): "mute", ord("n"): "next", ord(","): "previous",
+    ord("f"): "forward", ord("v"): "rewind", ord("o"): "on",
+}
+
+
+def remote_screen(screen):
+    path = Path.home() / ".local" / "share" / "tv" / "remote.py"
+    if not path.is_file():
+        raise TVError(f"Remote interface is missing: {path}")
+    spec = importlib.util.spec_from_file_location("tv_remote_ui", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    module.run(screen, SimpleNamespace(**globals()))
+
+
+def cmd_remote():
+    if not sys.stdin.isatty() or not sys.stdout.isatty():
+        raise TVError("Run 'tv remote' in a terminal, or select TV Remote in your launcher.")
+    curses.wrapper(remote_screen)
+
+
+def open_remote_terminal():
+    if shutil.which("kitty"):
+        command = ["kitty", "--title", "TV Remote", "-o", "initial_window_width=100c",
+                   "-o", "initial_window_height=36c", SCRIPT, "remote"]
+    elif shutil.which("alacritty"):
+        command = ["alacritty", "--title", "TV Remote", "-e", SCRIPT, "remote"]
+    else:
+        raise TVError("Open a terminal and run 'tv remote'. No supported terminal found.")
+    subprocess.Popen(command, start_new_session=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+
+def cmd_menu():
+    choices = {"Keyboard remote": ("remote",), "Wake TV": ("on",),
+               "Sleep TV": ("off",), "Play / pause": ("toggle",),
+               "Volume up": ("volume", "up"), "Volume down": ("volume", "down"),
+               "Mute": ("mute",), "Home": ("home",), "Back": ("back",),
+               "Sleep in 30 minutes": ("sleep", "30m"),
+               "Sleep in 1 hour": ("sleep", "1h"), "Cancel sleep timer": ("sleep", "cancel")}
+    for alias, (name, _) in APPS.items():
+        choices.setdefault("Open " + name, ("launch", alias))
+    result = run(["noctalia", "dmenu", "--prompt", "TV"],
+                 input="\n".join(choices) + "\n", timeout=None)
+    choice = result.stdout.strip()
+    if not choice:
+        if result.returncode not in (0, 1):
+            raise TVError(result.stderr.strip() or "Could not open Noctalia TV menu")
+        return
+    if choice not in choices:
+        raise TVError("Choose a listed TV action.")
+    if choices[choice] == ("remote",):
+        open_remote_terminal()
+        return
+    try:
+        dispatch(list(choices[choice]))
+    except TVError as error:
+        notify("TV command failed", str(error))
+        raise
+    notify("TV", choice)
+
+
+def dispatch(args):
+    if args and args[0] in ("--help", "-h", "help"):
+        print(HELP)
+        return
     if not args:
         cmd_on()
         print("\nWhat would you like to do?")
@@ -265,8 +495,7 @@ def main():
         print("  - Press Enter to leave TV on\n")
         try:
             choice = input("Choice: ").strip()
-        except (KeyboardInterrupt, EOFError):
-            print("")
+        except EOFError:
             return
         if not choice:
             return
@@ -277,26 +506,55 @@ def main():
         return
 
     sub = args[0].lower()
-    if sub == "on":
-        cmd_on()
-    elif sub == "off":
-        cmd_off()
-    elif sub == "status":
-        cmd_status()
+    simple = {"on": cmd_on, "off": cmd_off, "status": cmd_status,
+              "doctor": cmd_doctor, "now": cmd_now, "remote": cmd_remote, "menu": cmd_menu}
+    if sub in simple:
+        if len(args) != 1:
+            raise TVError(f"Usage: tv {sub}")
+        simple[sub]()
+    elif sub == "sleep":
+        sleep_timer(args[1:])
+    elif sub == "volume":
+        if len(args) not in (2, 3) or args[1] not in ("up", "down"):
+            raise TVError("Usage: tv volume <up|down> [1-20]")
+        if len(args) == 3 and not re.fullmatch(r"\d{1,2}", args[2]):
+            raise TVError("Volume step count must be between 1 and 20.")
+        count = int(args[2]) if len(args) == 3 else 1
+        if not 1 <= count <= 20:
+            raise TVError("Volume step count must be between 1 and 20.")
+        cmd_key("volume-" + args[1], count)
+    elif sub in KEYS:
+        if len(args) != 1:
+            raise TVError(f"Usage: tv {sub}")
+        cmd_key(sub)
     elif sub in ("launch", "app", "open"):
-        target = " ".join(args[1:])
-        cmd_launch(target)
+        cmd_launch(" ".join(args[1:]))
     elif sub in APPS:
-        # Direct shortcut e.g. `tv yt` or `tv netflix`
+        if len(args) != 1:
+            raise TVError(f"Usage: tv {sub}")
         cmd_launch(sub)
-    elif sub == "play":
-        query = " ".join(args[1:])
-        cmd_play(query, media_type="show")
+    elif sub in ("play", "search"):
+        cmd_play(" ".join(args[1:]), media_type="show")
+    elif sub.startswith("-"):
+        raise TVError(f"Unknown option: {sub}. Run 'tv --help'.")
     else:
-        # If user runs `tv "Breaking Bad"`, treat as play
-        query = " ".join(args)
-        cmd_play(query, media_type="show")
+        cmd_play(" ".join(args), media_type="show")
+
+
+def main():
+    args = sys.argv[1:]
+    if "movie" in os.path.basename(sys.argv[0]) and (not args or args[0] not in ("--help", "-h", "help")):
+        cmd_play(" ".join(args[1:] if args and args[0] == "play" else args), media_type="movie")
+    else:
+        dispatch(args)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except TVError as error:
+        print(f"TV: {error}", file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nCanceled.", file=sys.stderr)
+        sys.exit(130)

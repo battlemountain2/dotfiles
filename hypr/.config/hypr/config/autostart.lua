@@ -1,10 +1,10 @@
 -- Auto-start config
--- Sole plugin loader: hyprexpo is locally maintained; do not also run hyprpm
--- reload at startup. Source/rollback notes: ~/Projects/hyprexpo-fix/LOCAL-FIX.md.
+-- ScrollOverview loads asynchronously, using a tested build for the running ABI.
+-- ScrollOverview source: ~/Projects/scrolloverview; rebuild after Hyprland updates.
 hl.on("hyprland.start", function ()
 -- Complete KWallet PAM unlock using the login session environment.
 hl.exec_cmd("/usr/lib/pam_kwallet_init")
-hl.exec_cmd("hyprctl plugin load /home/bry/.config/hypr/plugins/hyprexpo.so")
+hl.exec_cmd("/home/bry/.local/bin/scrolloverview-control load")
 hl.exec_cmd("dbus-update-activation-environment --systemd --all")
 hl.exec_cmd("systemctl --user import-environment HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY && systemctl --user restart xdg-desktop-portal-hyprland")
 hl.exec_cmd("gsr-ui launch-daemon")

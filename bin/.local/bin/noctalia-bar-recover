@@ -1,0 +1,180 @@
+#!/usr/bin/python3
+"""Remap the LG bar; watch logind and Noctalia graphics resets when supervised."""
+
+import argparse
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+
+
+OUTPUT = "DP-2"
+BAR = "default"
+
+
+def command(*args):
+    result = subprocess.run(args, capture_output=True, text=True, timeout=5)
+    if result.returncode:
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip() or f"{args[0]} failed")
+    return result.stdout
+
+
+def recover():
+    status = json.loads(command("noctalia", "msg", "status"))
+    if status.get("locked", True):
+        return False
+    monitors = json.loads(command("hyprctl", "monitors", "-j"))
+    monitor = next((m for m in monitors if m["name"] == OUTPUT), None)
+    if not monitor or not monitor.get("dpmsStatus", False):
+        return False
+    layers = json.loads(command("hyprctl", "layers", "-j"))
+    surfaces = layers.get(OUTPUT, {}).get("levels", {})
+    if not any(layer.get("namespace") == "noctalia-bar-" + BAR
+               for group in surfaces.values() for layer in group):
+        return False
+    try:
+        command("noctalia", "msg", "bar-hide", BAR, OUTPUT)
+    finally:
+        # A timeout can happen after the server accepted the hide request.
+        command("noctalia", "msg", "bar-show", BAR, OUTPUT)
+    return True
+
+
+class Recovery:
+    def __init__(self, glib):
+        self.glib = glib
+        self.pending = False
+        self.reason = ""
+        self.attempts = 0
+
+    def schedule(self, reason):
+        self.reason = reason
+        self.attempts = 0
+        if not self.pending:
+            self.pending = True
+            self.glib.timeout_add_seconds(3, self.attempt)
+
+    def attempt(self):
+        self.attempts += 1
+        try:
+            if recover():
+                print(f"Refreshed {BAR} on {OUTPUT}: {self.reason}", flush=True)
+                self.pending = False
+                return False
+        except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
+            print(f"Bar recovery deferred: {error}", flush=True)
+        if self.attempts >= 12:
+            print("Recovery deferred until the next resume/unlock/reset event.", flush=True)
+            self.pending = False
+            return False
+        return True
+
+
+class LogTail:
+    def __init__(self, path):
+        self.path = path
+        self.identity = None
+        self.offset = 0
+        self.partial = ""
+        if path.exists():
+            stat = path.stat()
+            self.identity, self.offset = stat.st_ino, stat.st_size
+
+    def read(self):
+        try:
+            stat = self.path.stat()
+            if stat.st_ino != self.identity or stat.st_size < self.offset:
+                self.offset, self.partial = 0, ""
+            self.identity = stat.st_ino
+            with self.path.open("r", encoding="utf-8", errors="replace") as stream:
+                stream.seek(max(self.offset, stat.st_size - 65536))
+                data = self.partial + stream.read()
+                self.offset = stream.tell()
+            lines = data.split("\n")
+            self.partial = lines.pop()[-8192:]
+            return lines
+        except FileNotFoundError:
+            return []
+
+
+def watch():
+    import dbus
+    from dbus.mainloop.glib import DBusGMainLoop
+    from gi.repository import Gio, GLib, GLibUnix
+
+    DBusGMainLoop(set_as_default=True)
+    bus = dbus.SystemBus()
+    recovery = Recovery(GLib)
+
+    def on_sleep(sleeping):
+        if not sleeping:
+            recovery.schedule("system resumed")
+
+    bus.add_signal_receiver(on_sleep, signal_name="PrepareForSleep",
+                            dbus_interface="org.freedesktop.login1.Manager",
+                            path="/org/freedesktop/login1", bus_name="org.freedesktop.login1")
+    manager = dbus.Interface(bus.get_object("org.freedesktop.login1", "/org/freedesktop/login1"),
+                             "org.freedesktop.login1.Manager")
+    session = os.environ.get("XDG_SESSION_ID")
+    if session:
+        session_path = str(manager.GetSession(session))
+    else:
+        session_path = None
+        for _, uid, _, _, path in manager.ListSessions():
+            if int(uid) != os.getuid():
+                continue
+            properties = dbus.Interface(bus.get_object("org.freedesktop.login1", path),
+                                        "org.freedesktop.DBus.Properties")
+            if str(properties.Get("org.freedesktop.login1.Session", "Type")) == "wayland":
+                session_path = str(path)
+                break
+    if session_path:
+        def on_properties(interface, changed, invalidated):
+            if interface == "org.freedesktop.login1.Session" and "LockedHint" in changed and not changed["LockedHint"]:
+                recovery.schedule("session unlocked")
+
+        bus.add_signal_receiver(on_properties, signal_name="PropertiesChanged",
+                                dbus_interface="org.freedesktop.DBus.Properties", path=session_path,
+                                bus_name="org.freedesktop.login1")
+
+    cache = Path(os.environ.get("XDG_CACHE_HOME", str(Path.home() / ".cache"))) / "noctalia"
+    cache.mkdir(parents=True, exist_ok=True)
+    tail = LogTail(cache / "noctalia.log")
+
+    def on_log_change(*args):
+        for line in tail.read():
+            if "[app] graphics context recovery completed" in line:
+                recovery.schedule("Noctalia graphics context reset")
+
+    monitor = Gio.File.new_for_path(str(cache)).monitor_directory(Gio.FileMonitorFlags.NONE, None)
+    monitor.connect("changed", on_log_change)
+    loop = GLib.MainLoop()
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        GLibUnix.signal_add(GLib.PRIORITY_DEFAULT, sig, lambda: (loop.quit(), False)[1])
+    print(f"Watching resume, unlock, and graphics-reset events for {OUTPUT}; session={session_path}", flush=True)
+    try:
+        loop.run()
+    finally:
+        monitor.cancel()
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--watch", action="store_true", help="Watch resume/unlock and graphics-reset events")
+    args = parser.parse_args()
+    if args.watch:
+        watch()
+    elif recover():
+        print(f"Refreshed {BAR} bar on {OUTPUT}.")
+    else:
+        print("Bar refresh skipped: session locked, output asleep, or bar not mapped.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.TimeoutExpired) as error:
+        print(f"Bar recovery: {error}", file=sys.stderr)
+        sys.exit(1)

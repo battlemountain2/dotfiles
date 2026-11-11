@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+FIIO="alsa_output.usb-FIIO_FiiO_K11_R2R-01.playback.0.0"
+SPEAKER="alsa_output.pci-0000_10_00.6.analog-stereo"
+
+action="${1:-status}"
+
+case "$action" in
+    status)
+        current_sink=$(pactl get-default-sink 2>/dev/null || echo "")
+        mic_mute=$(pactl get-source-mute @DEFAULT_SOURCE@ 2>/dev/null | grep -q "yes" && echo "true" || echo "false")
+        sink_mute=$(pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null | grep -q "yes" && echo "true" || echo "false")
+        volume=$(pactl get-sink-volume @DEFAULT_SINK@ 2>/dev/null | grep -o "[0-9]*%" | head -1 | tr -d '%' || echo "100")
+        ee_state=$(easyeffects -b 3 2>/dev/null | tail -1 || echo "2")
+        ee_bypassed=$([[ "$ee_state" == "1" ]] && echo "true" || echo "false")
+        
+        sink_name="unknown"
+        if [[ "$current_sink" == "$FIIO" ]]; then
+            sink_name="fiio"
+        elif [[ "$current_sink" == "$SPEAKER" ]]; then
+            sink_name="speaker"
+        fi
+
+        cat <<EOF
+{"current_sink":"$sink_name","volume":$volume,"sink_mute":$sink_mute,"mic_mute":$mic_mute,"ee_bypassed":$ee_bypassed}
+EOF
+        ;;
+    fiio)
+        pactl set-default-sink "$FIIO"
+        notify-send -a "Audio Output" -i audio-headphones "Switched to FiiO K11 R2R" "Headphones (ATH-R50x)" -t 2500
+        ;;
+    speaker|speakers)
+        pactl set-default-sink "$SPEAKER"
+        notify-send -a "Audio Output" -i audio-speakers "Switched to Redragon Speakers" "Ryzen HD Audio (Realtek ALC897)" -t 2500
+        ;;
+    toggle-sink)
+        current=$(pactl get-default-sink 2>/dev/null || echo "")
+        if [[ "$current" == "$FIIO" ]]; then
+            pactl set-default-sink "$SPEAKER"
+            notify-send -a "Audio Output" -i audio-speakers "Switched to Redragon Speakers" "Ryzen HD Audio (Realtek ALC897)" -t 2500
+        else
+            pactl set-default-sink "$FIIO"
+            notify-send -a "Audio Output" -i audio-headphones "Switched to FiiO K11 R2R" "Headphones (ATH-R50x)" -t 2500
+        fi
+        ;;
+    ee-toggle)
+        easyeffects --bypass-toggle >/dev/null 2>&1 || true
+        ee_state=$(easyeffects -b 3 2>/dev/null | tail -1 || echo "2")
+        if [[ "$ee_state" == "1" ]]; then
+            notify-send -a "EasyEffects" -i audio-card "EasyEffects Bypassed" "Raw audio straight to DAC" -t 2500
+        else
+            notify-send -a "EasyEffects" -i audio-card "EasyEffects Active" "Crossfeed / DSP processing enabled" -t 2500
+        fi
+        ;;
+    mic-toggle)
+        pactl set-source-mute @DEFAULT_SOURCE@ toggle
+        is_muted=$(pactl get-source-mute @DEFAULT_SOURCE@ 2>/dev/null || echo "")
+        if echo "$is_muted" | grep -q "yes"; then
+            notify-send -a "Microphone" -i microphone-disabled "Yeti X Muted" "Microphone input muted" -t 2000
+        else
+            notify-send -a "Microphone" -i audio-input-microphone "Yeti X Unmuted" "Microphone input live" -t 2000
+        fi
+        ;;
+    mute-toggle)
+        pactl set-sink-mute @DEFAULT_SINK@ toggle
+        is_muted=$(pactl get-sink-mute @DEFAULT_SINK@ 2>/dev/null || echo "")
+        if echo "$is_muted" | grep -q "yes"; then
+            notify-send -a "Audio Output" -i audio-volume-muted "Audio Muted" -t 2000
+        else
+            notify-send -a "Audio Output" -i audio-volume-high "Audio Unmuted" -t 2000
+        fi
+        ;;
+    volume)
+        vol="${2:-100}"
+        pactl set-sink-volume @DEFAULT_SINK@ "${vol}%"
+        notify-send -a "Volume" -i audio-volume-high "Volume Set" "${vol}%" -t 2000
+        ;;
+    gui)
+        easyeffects >/dev/null 2>&1 &
+        ;;
+    pavucontrol)
+        pavucontrol >/dev/null 2>&1 &
+        ;;
+esac

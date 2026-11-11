@@ -5,7 +5,7 @@ local colors = require("config.colors")
 
 hl.config({
     render = {
-        cm_auto_hdr = 1,
+        cm_auto_hdr = 0,
         direct_scanout = 2,
     },
     dwindle = {
@@ -16,13 +16,14 @@ hl.config({
     },
     misc = {
         disable_hyprland_logo = true,
-        vrr = 3, -- Fullscreen games only; preserved from the former GUI config.
+        vrr = 2, -- Enable VRR for fullscreen windows.
         col = {
             splash = colors.PRIMARY,
         },
         middle_click_paste = false,
         enable_swallow = true,
-        swallow_regex = "(kitty|ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
+        swallow_regex = "(kitty|ghostty|com\\.mitchellh\\.ghostty|[Kk]onsole|Alacritty|gnome-terminal|xfce[0-9]?-terminal)",
+        render_unfocused_fps = 60, -- Prevents OBS and background window captures from dropping to 15 FPS
     },
     xwayland = {
         force_zero_scaling = true

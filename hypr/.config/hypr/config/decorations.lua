@@ -9,11 +9,15 @@ hl.config({
         border_size = 2,
         extend_border_grab_area = 10,
         resize_on_border = true,
+        snap = {
+            enabled = false,
+        },
         -- Border COLOURS are NOT here. They live in config/borders.lua, which
         -- hyprland.lua requires after Noctalia's appended apply_theme() --
         -- otherwise that call overwrites them and this block does nothing.
     },
     decoration = {
+        wobble = { enabled = false },
         -- Squircle corners. The superellipse is what reads as "designed"
         -- rather than "rounded rect". Cheapest big win here.
         -- Check support: hyprctl getoption decoration:rounding_power
@@ -23,8 +27,8 @@ hl.config({
         -- Restrained transparency. 0.88 looked good in isolation but at
         -- 1440p it costs text contrast in Kate/Dolphin/Zen, and on OLED you
         -- do not need transparency to get depth — you have real blacks.
-        active_opacity = 0.94,
-        inactive_opacity = 0.86,
+        active_opacity = 1.0,
+        inactive_opacity = 0.97,
         fullscreen_opacity = 1,
 
         -- Dim does the focus-cue work that heavy transparency was doing,
@@ -37,8 +41,9 @@ hl.config({
         blur = {
             enabled = true,
             size = 6,
-            passes = 3,
+            passes = 4,
             new_optimizations = true,
+            ignore_opacity = true,
 
             -- The important one. Windows blur the wallpaper, not each other,
             -- so stacked translucent windows stay legible instead of
@@ -95,4 +100,12 @@ hl.layer_rule({
     blur = true,
     blur_popups = true,
     ignore_alpha = 0.1,
+})
+
+-- Cursor Calculator is a non-reserving popup; show it immediately and solid.
+hl.layer_rule({
+    name = "cursor-calculator-popup",
+    match = { namespace = "^bry-cursor-calculator$" },
+    no_anim = true,
+    blur = false,
 })

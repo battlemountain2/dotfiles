@@ -1,0 +1,159 @@
+#!/usr/bin/env python3
+import sys
+import os
+import subprocess
+import json
+import urllib.parse
+from datetime import datetime
+
+VAULT_PATH = os.path.expanduser("~/notes")
+IGNORED_DIRS = {".obsidian", ".git", ".smart-env", "templates", "attachments"}
+
+def get_relative_notes():
+    notes = []
+    if not os.path.isdir(VAULT_PATH):
+        return notes
+    for root, dirs, files in os.walk(VAULT_PATH):
+        dirs[:] = [d for d in dirs if d not in IGNORED_DIRS]
+        for f in files:
+            if f.endswith(".md"):
+                full_path = os.path.join(root, f)
+                rel_path = os.path.relpath(full_path, VAULT_PATH)
+                notes.append({
+                    "full_path": full_path,
+                    "rel_path": rel_path,
+                    "name": f[:-3],
+                    "folder": os.path.dirname(rel_path) or "root",
+                    "mtime": os.path.getmtime(full_path)
+                })
+    return notes
+
+def search_notes(query=""):
+    notes = get_relative_notes()
+    query = query.strip().lower()
+    results = []
+
+    for n in notes:
+        score = 0
+        name_lower = n["name"].lower()
+        rel_lower = n["rel_path"].lower()
+
+        if not query:
+            score = 1
+        elif query in name_lower:
+            score = 10 if name_lower.startswith(query) else 5
+        elif query in rel_lower:
+            score = 2
+
+        if score > 0:
+            results.append((score, n["mtime"], n))
+
+    # Sort by relevance, then most recently modified
+    results.sort(key=lambda x: (x[0], x[1]), reverse=True)
+    out = []
+    for _, _, n in results[:15]:
+        out.append({
+            "title": n["name"],
+            "path": n["rel_path"],
+            "folder": n["folder"],
+            "vault_file": n["rel_path"][:-3] if n["rel_path"].endswith(".md") else n["rel_path"]
+        })
+    return out
+
+def add_todo(task):
+    if not task.strip():
+        return
+    todo_file = os.path.join(VAULT_PATH, "inbox", "todo.md")
+    os.makedirs(os.path.dirname(todo_file), exist_ok=True)
+    entry = f"- [ ] {task.strip()}\n"
+    with open(todo_file, "a", encoding="utf-8") as f:
+        f.write(entry)
+    subprocess.run([
+        "notify-send", "-a", "Obsidian", "-i", "checkbox",
+        "Task Added to Obsidian Inbox", task.strip(), "-t", "2500"
+    ])
+
+def add_daily_log(text):
+    if not text.strip():
+        return
+    now = datetime.now()
+    today_str = now.strftime("%Y-%m-%d")
+    daily_dir = os.path.join(VAULT_PATH, "daily")
+    os.makedirs(daily_dir, exist_ok=True)
+    daily_file = os.path.join(daily_dir, f"{today_str}.md")
+
+    if not os.path.exists(daily_file):
+        template_file = os.path.join(VAULT_PATH, "templates", "daily-template.md")
+        content = f"# {today_str}\n\n[[reference/Start-Here|Start Here]] · [[inbox/todo|Quick tasks]]\n\n### Dev Log\n"
+        if os.path.exists(template_file):
+            try:
+                with open(template_file, "r", encoding="utf-8") as tf:
+                    t_raw = tf.read()
+                    content = t_raw.replace("{{date}}", today_str)
+                    if "### Dev Log" not in content:
+                        content += "\n\n### Dev Log\n"
+            except Exception:
+                pass
+        with open(daily_file, "w", encoding="utf-8") as df:
+            df.write(content)
+
+    time_str = now.strftime("%H:%M")
+    entry = f"- `{time_str}` — {text.strip()}\n"
+    with open(daily_file, "a", encoding="utf-8") as df:
+        df.write(entry)
+
+    subprocess.run([
+        "notify-send", "-a", "Obsidian", "-i", "document",
+        "Logged to Daily Note", f"{time_str} — {text.strip()}", "-t", "2500"
+    ])
+
+def open_note(rel_file):
+    if not rel_file:
+        uri = "obsidian://open?vault=notes"
+    else:
+        file_param = urllib.parse.quote(rel_file)
+        uri = f"obsidian://open?vault=notes&file={file_param}"
+
+    subprocess.run(["xdg-open", uri])
+
+    # Focus Obsidian window in Hyprland if running
+    lua = '''for _, w in ipairs(hl.get_windows()) do
+        if w.class and (w.class:lower():match("obsidian") or (w.initial_class and w.initial_class:lower():match("obsidian"))) then
+            if w.workspace and w.workspace.monitor then
+                hl.dispatch(hl.dsp.focus({ monitor = w.workspace.monitor.name }))
+            end
+            if w.workspace then
+                hl.dispatch(hl.dsp.focus({ workspace = tostring(w.workspace.id) }))
+            end
+            hl.dispatch(hl.dsp.focus({ window = w }))
+            if w.at and w.size then
+                local cx = math.floor(w.at.x + w.size.x / 2)
+                local cy = math.floor(w.at.y + w.size.y / 2)
+                hl.dispatch(hl.dsp.cursor.move({ x = cx, y = cy }))
+            end
+            break
+        end
+    end'''
+    subprocess.run(["hyprctl", "repl", lua], stderr=subprocess.DEVNULL)
+
+def main():
+    if len(sys.argv) < 2:
+        print(json.dumps(search_notes("")))
+        return
+
+    cmd = sys.argv[1]
+    arg = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else ""
+
+    if cmd == "search":
+        print(json.dumps(search_notes(arg)))
+    elif cmd == "todo":
+        add_todo(arg)
+    elif cmd == "log":
+        add_daily_log(arg)
+    elif cmd == "open":
+        open_note(arg)
+    else:
+        print(json.dumps(search_notes(cmd)))
+
+if __name__ == "__main__":
+    main()

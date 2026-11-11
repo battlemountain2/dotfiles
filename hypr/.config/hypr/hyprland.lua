@@ -68,35 +68,15 @@ require("config.windowrules")
 require("config.workspaces")
 pcall(require, "optional.plugins")
 
+-- HyprMod owns monitor definitions and GUI overrides on this host.
+-- require("hyprland-gui")
 
--- Monitor and startup settings live in optional/monitors-<host> and
--- config/autostart. Do not load hyprland-gui: its generated monitor and
--- HyprPM startup entries would override these. Saved profiles are references.
+-- Keep the dedicated FL Studio Wine environment off the gaming workspace.
+require("optional.fl-studio")
 
--- MANAGED BY NOCTALIA. Its Hyprland template re-adds this line if it goes
--- missing, so deleting it is pointless while Noctalia is installed. Verified
--- 2026-08 that it only ensures the line exists -- it does not rewrite what
--- follows, which is what makes the block below work.
---
--- DROPPING NOCTALIA: this is the one hard dependency left in the config. It is
--- a bare require, and it sits ABOVE config.borders, so if noctalia.lua is gone
--- this throws and borders never apply. config/colors.lua falls back to a static
--- palette on its own, but this line does not -- delete it by hand when you
--- actually migrate. Deliberately not wrapped in pcall here: altering the text
--- risks Noctalia no longer recognising its own line and appending a second.
+-- For Noctalia Color templates
 require("noctalia").apply_theme()
 
--- ---------------------------------------------------------------------------
--- EVERYTHING BELOW RUNS AFTER NOCTALIA'S apply_theme().
---
--- That is the entire point: apply_theme() sets general.col.* and group.col.*,
--- so our border colours have to be applied after it or they do nothing.
---
--- Verified to survive theme regeneration. If this require ever vanishes or
--- ends up ABOVE the apply_theme() line, Noctalia's behaviour changed and
--- borders will silently go flat -- see the notes in config/borders.lua.
--- ---------------------------------------------------------------------------
+-- Keep this last: the generated palette writes the same border options.
+-- Noctalia's template hook sees the include above and will not append another.
 require("config.borders")
-
--- HyprMod managed settings
-require("hyprland-gui")

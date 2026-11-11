@@ -33,7 +33,9 @@ hl.animation({ leaf = "global", enabled = true, speed = 3, bezier = "quick" })
 -- time -- at 4ds there wasn't enough of it to see. Settled on 6ds.
 hl.animation({ leaf = "windowsIn",   enabled = true, speed = 4, bezier = "overshoot", style = "popin 85%" })
 hl.animation({ leaf = "windowsOut",  enabled = true, speed = 6, bezier = "easeInQuad", style = "slide" })
-hl.animation({ leaf = "windowsMove", enabled = true, speed = 4, bezier = "easeOutQuint" })
+-- Shared movement animation: a short, non-overshooting glide for the scrolling tape.
+hl.curve("carouselGlide", { type = "bezier", points = { {0.22, 0.8}, {0.3, 1} } })
+hl.animation({ leaf = "windowsMove", enabled = true, speed = 3, bezier = "carouselGlide" })
 
 --Fade
 hl.animation({ leaf = "fadeIn",     enabled = true, speed = 3, bezier = "almostLinear" })
@@ -55,7 +57,7 @@ hl.animation({ leaf = "borderangle", enabled = false, speed = 100, bezier = "lin
 -- Workspaces: 5ds is ~half a second, which fights hyprtasking's own
 -- overview timing. 4 is the compromise -- readable, still ahead of the
 -- overview, and less abrupt than the 3 it used to be.
-hl.animation({ leaf = "workspaces",          enabled = true, speed = 4, bezier = "quick", style = "slide" })
+hl.animation({ leaf = "workspaces",          enabled = true, speed = 4, bezier = "quick", style = "slidevert" })
 hl.animation({ leaf = "specialWorkspaceIn",  enabled = true, speed = 2, bezier = "quick", style = "slide top" })
 hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2, bezier = "quick", style = "slide bottom" })
 
@@ -63,3 +65,6 @@ hl.animation({ leaf = "specialWorkspaceOut", enabled = true, speed = 2, bezier =
 -- the noctalia layer rule, so these apply to other layer surfaces only.
 hl.animation({ leaf = "layersIn",  enabled = true, speed = 3, bezier = "overshoot", style = "popin 90%" })
 hl.animation({ leaf = "layersOut", enabled = true, speed = 2, bezier = "easeOutQuint", style = "popin 90%" })
+
+-- Short easing for desktop magnification.
+hl.animation({ leaf = "zoomFactor", enabled = true, speed = 2, bezier = "easeOutQuint" })

@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""Load a tested ScrollOverview build outside Hyprland's Lua config processing."""
+import argparse
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import time
+
+ROOT = Path.home() / ".local/share/scrolloverview"
+
+
+def ipc(*arguments, json_output=False, timeout=5):
+    signature = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+    if not signature:
+        raise RuntimeError("No Hyprland session was specified")
+    command = ["hyprctl", "--instance", signature]
+    if json_output:
+        command.append("-j")
+    result = subprocess.run(command + list(arguments), capture_output=True, text=True, timeout=timeout)
+    if result.returncode:
+        raise RuntimeError(result.stdout.strip() or result.stderr.strip() or "Hyprland did not respond")
+    return json.loads(result.stdout) if json_output else result.stdout.strip()
+
+
+def run(action):
+    runtime = Path(os.environ.get("XDG_RUNTIME_DIR", "/run/user/" + str(os.getuid())))
+    key = hashlib.sha256(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE", "").encode()).hexdigest()[:12]
+    with (runtime / ("scrolloverview-" + key + ".lock")).open("a") as lock:
+        try:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            return
+        version = ipc("version", json_output=True)
+        manifest = json.loads((ROOT / "builds.json").read_text())
+        build = manifest["builds"].get(version["abiHash"])
+        if not build:
+            raise RuntimeError("No tested overview build for Hyprland " + version["version"] + "; plugin kept disabled")
+        loaded = "Plugin scrolloverview by " in ipc("plugin", "list")
+        if action == "status":
+            print(json.dumps({"hyprland": version["version"], "loaded": loaded, "build": build["source_commit"]}))
+            return
+        if not loaded:
+            plugin = Path(build["path"])
+            with plugin.open("rb") as binary:
+                digest = hashlib.file_digest(binary, "sha256").hexdigest()
+            if digest != build["sha256"]:
+                raise RuntimeError("Overview binary changed since validation; plugin kept disabled")
+            result = ipc("plugin", "load", str(plugin), timeout=12)
+            if result != "ok":
+                raise RuntimeError("Overview could not load: " + result)
+            # The plugin queues a reload. Let it restore the Lua namespace and settings
+            # before dispatching the first shortcut. Every wait has a deadline.
+            deadline = time.monotonic() + 8
+            while time.monotonic() < deadline:
+                configured = ipc("getoption", "plugin:scrolloverview:workspace_gap")
+                if "int: 80" in configured:
+                    break
+                time.sleep(0.1)
+            else:
+                raise RuntimeError("Overview loaded but its settings did not finish applying")
+        if action == "toggle":
+            result = ipc("eval", 'hl.plugin.scrolloverview._dispatch("overview", "toggle")')
+            if result != "ok":
+                raise RuntimeError("Overview toggle failed: " + result)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("action", choices=("load", "toggle", "status"), nargs="?", default="toggle")
+    action = parser.parse_args().action
+    try:
+        run(action)
+    except (OSError, ValueError, KeyError, RuntimeError, subprocess.TimeoutExpired) as error:
+        print("ScrollOverview: " + str(error), file=sys.stderr)
+        if action != "status":
+            try:
+                subprocess.run(["notify-send", "-a", "ScrollOverview", "Overview unavailable", str(error)], timeout=3)
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        return 1
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

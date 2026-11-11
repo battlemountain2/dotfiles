@@ -1,9 +1,16 @@
 *.bak
-*.bak2
+*.bak*
+*.backup-*
+*.before-*
+*~[0-9]~
 _to_delete/
+__pycache__/
+*.pyc
+*.so
 
 # Machine-local state and credentials
 calendar-sync.json
+restore_token
 **/credentials*
 **/tokens*
 **/cookies*

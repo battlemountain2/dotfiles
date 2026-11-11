@@ -1,4 +1,8 @@
+[ExtractDialog]
+2 screens: Window-Maximized=true
+
 [General]
+AlwaysShowTabBar=true
 DynamicView=true
 FilterBar=true
 GlobalViewProps=false
@@ -16,11 +20,11 @@ showHovered=false
 Places Icons Auto-resize=false
 Places Icons Static Size=22
 
-[MainWindow]
-MenuBar=Disabled
-
 [PreviewSettings]
-Plugins=ffmpegthumbnailer,appimagethumbnail,audiothumbnail,glycin-heif,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,FreeCAD,imagethumbnail,glycin-image-rs,jpegthumbnail,glycin-jxl,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,gsthumbnail,rawthumbnail,ffmpegthumbnailer-audio,glycin-svg,svgthumbnail,textthumbnail,gsf-office
+Plugins=ffmpegthumbnailer,appimagethumbnail,audiothumbnail,glycin-heif,blenderthumbnail,comicbookthumbnail,cursorthumbnail,djvuthumbnail,ebookthumbnail,exrthumbnail,directorythumbnail,fontthumbnail,FreeCAD,imagethumbnail,glycin-image-rs,jpegthumbnail,glycin-jxl,kraorathumbnail,windowsexethumbnail,windowsimagethumbnail,opendocumentthumbnail,gsthumbnail,rawthumbnail,ffmpegthumbnailer-audio,glycin-svg,svgthumbnail,textthumbnail,exe-thumbnailer,gsf-office
 
-[UiSettings]
-ColorScheme=Noctalia
+[Search]
+Location=Everywhere
+SearchTool=Baloo
+
+

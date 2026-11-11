@@ -1,0 +1,19 @@
+#!/bin/sh
+ws=$(umbriel workspaces 2>/dev/null | grep '(focused)')
+
+case "$ws" in
+    *scrolling*|*DP-2*)
+        if [ "$1" = "down" ]; then
+            exec umbriel msg layout-scroll-down
+        else
+            exec umbriel msg layout-scroll-up
+        fi
+        ;;
+    *)
+        if [ "$1" = "down" ]; then
+            exec umbriel msg workspace-next
+        else
+            exec umbriel msg workspace-previous
+        fi
+        ;;
+esac

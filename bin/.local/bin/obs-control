@@ -1,0 +1,83 @@
+#!/usr/bin/env node
+/**
+ * obs-control: Quick CLI to interact with OBS Studio via WebSocket v5
+ */
+const { execSync } = require('child_process');
+
+const args = process.argv.slice(2);
+const cmd = args[0] || 'help';
+
+if (cmd === 'stream-mode') {
+  try {
+    execSync('/home/bry/.config/hypr/scripts/stream_mode.sh', { stdio: 'inherit' });
+  } catch (e) {}
+  process.exit(0);
+}
+
+const ws = new WebSocket('ws://127.0.0.1:4455');
+const timeout = setTimeout(() => {
+  try {
+    execSync('notify-send -a "OBS Control" -u low "OBS Offline" "Start OBS Studio to control scenes."');
+  } catch (e) {}
+  process.exit(1);
+}, 1500);
+
+ws.onopen = () => {};
+
+ws.onmessage = (e) => {
+  try {
+    const msg = JSON.parse(e.data);
+    if (msg.op === 0) {
+      ws.send(JSON.stringify({ op: 1, d: { rpcVersion: 1 } }));
+    } else if (msg.op === 2) {
+      // Authenticated
+      clearTimeout(timeout);
+      if (cmd === 'scene') {
+        const sceneName = args.slice(1).join(' ');
+        ws.send(JSON.stringify({
+          op: 6,
+          d: {
+            requestType: 'SetCurrentProgramScene',
+            requestId: 'set_scene',
+            requestData: { sceneName }
+          }
+        }));
+      } else if (cmd === 'mute') {
+        const inputName = args.slice(1).join(' ') || 'Mic/Aux';
+        ws.send(JSON.stringify({
+          op: 6,
+          d: {
+            requestType: 'ToggleInputMute',
+            requestId: 'toggle_mute',
+            requestData: { inputName }
+          }
+        }));
+      } else {
+        process.exit(0);
+      }
+    } else if (msg.op === 7) {
+      if (msg.d && msg.d.requestId === 'set_scene') {
+        const scene = args.slice(1).join(' ');
+        try {
+          execSync(`notify-send -a "OBS Studio" -i video-display "OBS Scene" "Switched to: ${scene}"`);
+        } catch (e) {}
+      } else if (msg.d && msg.d.requestId === 'toggle_mute') {
+        try {
+          execSync('notify-send -a "OBS Studio" -i audio-input-microphone "Microphone Mute" "Toggled mic mute state."');
+        } catch (e) {}
+      }
+      ws.close();
+      process.exit(0);
+    }
+  } catch (err) {
+    process.exit(1);
+  }
+};
+
+ws.onerror = () => {
+  clearTimeout(timeout);
+  try {
+    execSync('notify-send -a "OBS Control" -u low "OBS Offline" "Start OBS Studio to control scenes."');
+  } catch (e) {}
+  process.exit(1);
+};

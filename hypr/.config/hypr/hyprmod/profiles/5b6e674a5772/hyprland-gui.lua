@@ -36,12 +36,17 @@ hl.monitor({
     max_luminance = 418,
     max_avg_luminance = 418,
 })
+hl.monitor({
+    output = "DP-2",
+    disabled = false,
+    mode = "2560x1440@200.01Hz",
+    position = "2560x-1120",
+    scale = 1,
+    transform = 3,
+})
 
 -- Keybinds
 hl.unbind("SUPER + B")
 hl.bind("SUPER + B", hl.dsp.exec_cmd("zen-browser"))
 
--- Autostart
-hl.on("hyprland.start", function()
-    hl.exec_cmd("hyprpm reload -n")
-end)
+

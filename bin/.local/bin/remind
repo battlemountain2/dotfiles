@@ -1,0 +1,59 @@
+#!/usr/bin/env python3
+import sys, os, re, time, subprocess
+from datetime import datetime, timedelta
+
+if len(sys.argv) < 2:
+    subprocess.run(["notify-send", "Remind Usage", "remind <time> [optional note]\nExamples:\nremind 40m Pizza\nremind 6:00pm Call mom"])
+    sys.exit(1)
+
+time_str = sys.argv[1].lower()
+note = " ".join(sys.argv[2:]) if len(sys.argv) > 2 else "Reminder!"
+
+delay_seconds = None
+target_label = ""
+
+# 1. Parse relative time (e.g. 40min, 40m, 15m, 2h, 45s)
+rel_match = re.match(r"^(\d+)\s*(s|sec|m|min|h|hr)?$", time_str)
+if rel_match:
+    val = int(rel_match.group(1))
+    unit = rel_match.group(2) or "m"
+    if unit.startswith("s"):
+        delay_seconds = val
+        target_label = f"{val} seconds"
+    elif unit.startswith("h"):
+        delay_seconds = val * 3600
+        target_label = f"{val} hour(s)"
+    else:
+        delay_seconds = val * 60
+        target_label = f"{val} minute(s)"
+else:
+    # 2. Parse clock time (e.g. 6:00pm, 6pm, 18:30)
+    now = datetime.now()
+    target_dt = None
+    for fmt in ["%I:%M%p", "%I%p", "%H:%M"]:
+        try:
+            t = datetime.strptime(time_str.upper(), fmt).time()
+            target_dt = datetime.combine(now.date(), t)
+            # If the time already passed today, set it for tomorrow
+            if target_dt <= now:
+                target_dt += timedelta(days=1)
+            break
+        except ValueError:
+            continue
+
+    if target_dt:
+        delay_seconds = int((target_dt - now).total_seconds())
+        target_label = target_dt.strftime("%I:%M %p").lstrip("0")
+    else:
+        subprocess.run(["notify-send", "-u", "critical", "Error", f"Could not parse time: '{time_str}'"])
+        sys.exit(1)
+
+# Instant feedback confirmation banner
+subprocess.run(["notify-send", "-i", "alarm", "⏰ Reminder Set", f"{note} (at/in {target_label})"])
+
+# Fork to background so it runs silently
+if os.fork() == 0:
+    os.setsid()
+    time.sleep(delay_seconds)
+    subprocess.run(["notify-send", "-u", "critical", "-i", "alarm", "⏰ Reminder!", note])
+    sys.exit(0)

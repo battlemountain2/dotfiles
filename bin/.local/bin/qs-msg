@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# Quickshell Hyprland IPC bridge & message dispatcher
+set -euo pipefail
+
+ACTION="${1:-}"
+shift || true
+ARG="${1:-}"
+
+case "$ACTION" in
+    "panel-toggle")
+        case "$ARG" in
+            "launcher")
+                quickshell ipc call launcher toggle 2>/dev/null || true
+                ;;
+            "clipboard")
+                quickshell ipc call launcher toggle 2>/dev/null || true
+                ;;
+            "session")
+                quickshell ipc call powermenu toggle 2>/dev/null || true
+                ;;
+            "wallpaper")
+                quickshell ipc call wallpaper toggle 2>/dev/null || true
+                ;;
+            "control-center")
+                quickshell ipc call controlcenter toggle 2>/dev/null || true
+                ;;
+            "settings")
+                quickshell ipc call settings toggle 2>/dev/null || true
+                ;;
+            *)
+                quickshell ipc call "$ARG" toggle 2>/dev/null || true
+                ;;
+        esac
+        ;;
+    "volume-up")
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+
+        ;;
+    "volume-down")
+        wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-
+        ;;
+    "volume-mute")
+        wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle
+        ;;
+    "mic-mute")
+        wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle
+        ;;
+    "brightness-up")
+        quickshell ipc call brightness up 2>/dev/null || ~/.config/quickshell/scripts/brightness.sh step 5
+        ;;
+    "brightness-down")
+        quickshell ipc call brightness down 2>/dev/null || ~/.config/quickshell/scripts/brightness.sh step -5
+        ;;
+    "nightlight-toggle")
+        quickshell ipc call nightlight toggle 2>/dev/null || true
+        ;;
+    "media")
+        case "$ARG" in
+            "toggle") playerctl play-pause 2>/dev/null || true ;;
+            "next") playerctl next 2>/dev/null || true ;;
+            "previous") playerctl previous 2>/dev/null || true ;;
+        esac
+        ;;
+    "session")
+        case "$ARG" in
+            "lock") hyprlock ;;
+        esac
+        ;;
+    "screenshot-region")
+        satty -f - --output-filename "Screenshot-$(date +%F_%H-%M-%S).png" 2>/dev/null || grim -g "$(slurp)" - | wl-copy
+        ;;
+    "screenshot-fullscreen")
+        grim - | wl-copy
+        ;;
+    *)
+        quickshell ipc call "$ACTION" "$ARG" 2>/dev/null || true
+        ;;
+esac

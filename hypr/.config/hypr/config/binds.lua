@@ -37,41 +37,25 @@ local function adjacent_workspace(delta)
     if target ~= ws.id then return target end
 end
 
--- Carousel navigation for scrolling layouts on both monitors.
--- Moves across windows/columns within the active monitor's carousel,
--- preventing monitor-hopping and avoiding accidental workspace jumps.
-local function navigate_carousel(dir, delta)
+-- Navigate the scrolling layout itself, keeping focus on this workspace.
+-- Left/right traverse horizontal columns; up/down traverse vertical strips.
+local function navigate_carousel(dir)
     return function()
-        local orig_mon = hl.get_active_monitor()
-        local orig_ws = hl.get_active_special_workspace() or hl.get_active_workspace()
-        if not orig_mon or not orig_ws then return end
-        local orig_mon_name = orig_mon.name
-        local orig_ws_id = orig_ws.id
-
-        -- Try directional focus first
-        hl.dispatch(hl.dsp.focus({ direction = dir }))
-
-        local new_mon = hl.get_active_monitor()
-        local new_ws = hl.get_active_special_workspace() or hl.get_active_workspace()
-
-        -- If focus tried to jump across monitors or workspaces:
-        if (new_mon and new_mon.name ~= orig_mon_name) or (new_ws and new_ws.id ~= orig_ws_id) then
-            hl.dispatch(hl.dsp.focus({ monitor = orig_mon_name }))
-            hl.dispatch(hl.dsp.layout(delta > 0 and "move +col" or "move -col"))
-            local final_mon = hl.get_active_monitor()
-            if final_mon and final_mon.name ~= orig_mon_name then
-                hl.dispatch(hl.dsp.focus({ monitor = orig_mon_name }))
-            end
+        local ws = hl.get_active_special_workspace() or hl.get_active_workspace()
+        if ws and ws.tiled_layout == "scrolling" then
+            hl.dispatch(hl.dsp.layout("focus " .. dir:sub(1, 1)))
+        else
+            hl.dispatch(hl.dsp.focus({ direction = dir }))
         end
     end
 end
 
-hl.bind(mainMod .. " + Left",  navigate_carousel("left",  -1))
-hl.bind(mainMod .. " + Right", navigate_carousel("right",  1))
-hl.bind(mainMod .. " + Up",    navigate_carousel("up",    -1))
-hl.bind(mainMod .. " + Down",  navigate_carousel("down",   1))
+hl.bind(mainMod .. " + Left",  navigate_carousel("left"))
+hl.bind(mainMod .. " + Right", navigate_carousel("right"))
+hl.bind(mainMod .. " + Up",    navigate_carousel("up"))
+hl.bind(mainMod .. " + Down",  navigate_carousel("down"))
 
-hl.bind("ALT + Tab", hl.dsp.window.cycle_next())
+hl.bind("ALT + Tab", hl.dsp.exec_cmd("noctalia msg window-switcher"))
 
 -- Move window position within the layout
 hl.bind(mainMod .. " + SHIFT + Left",  hl.dsp.window.move({ direction = "left" }))
@@ -106,14 +90,29 @@ hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_down", hl.dsp.window.move({ works
 hl.bind(mainMod .. " + CONTROL + SHIFT + mouse_up",   hl.dsp.window.move({ workspace = "r-1", follow = false }))
 
 -- Focus a display while leaving fullscreen windows on their current workspace.
-hl.bind(mainMod .. " + ALT + 1", function()
-    hl.dispatch(hl.dsp.focus({ monitor = "DP-1" }))
-    hl.dispatch(hl.dsp.cursor.move({ x = 1280, y = 720 }))
-end)
-hl.bind(mainMod .. " + ALT + 2", function()
-    hl.dispatch(hl.dsp.focus({ monitor = "DP-2" }))
-    hl.dispatch(hl.dsp.cursor.move({ x = 3280, y = 160 }))
-end)
+local function focus_monitor(selector)
+    return function()
+        local previous = hl.get_active_monitor()
+        hl.dispatch(hl.dsp.focus({ monitor = selector }))
+        local monitor = hl.get_active_monitor()
+        if not monitor or (previous and monitor.name == previous.name) then return end
+
+        -- no_warps keeps ordinary window focus still; move only on a monitor change.
+        local width, height = monitor.width / monitor.scale, monitor.height / monitor.scale
+        if monitor.transform % 2 == 1 then width, height = height, width end
+        hl.dispatch(hl.dsp.cursor.move({
+            x = math.floor(monitor.position.x + width / 2),
+            y = math.floor(monitor.position.y + height / 2),
+        }))
+    end
+end
+
+for key, direction in pairs({ Left = "l", Right = "r", Up = "u", Down = "d" }) do
+    hl.bind(mainMod .. " + ALT + " .. key, focus_monitor(direction))
+end
+
+hl.bind(mainMod .. " + ALT + 1", focus_monitor("DP-1"))
+hl.bind(mainMod .. " + ALT + 2", focus_monitor("DP-2"))
 
 -- Move the focused window onto the target monitor's active workspace.
 hl.bind(mainMod .. " + ALT + mouse_up",   hl.dsp.window.move({ monitor = "DP-1" }))
@@ -130,10 +129,10 @@ hl.bind(mainMod .. " + mouse:273", hl.dsp.window.resize())
 -- Keyboard Window Resizing
 local step = 30
 
-hl.bind(mainMod .. " + ALT + Left",  hl.dsp.window.resize({ x = -step, y = 0, relative = true }), { repeating = true })
-hl.bind(mainMod .. " + ALT + Right", hl.dsp.window.resize({ x = step,  y = 0, relative = true }), { repeating = true })
-hl.bind(mainMod .. " + ALT + Up",    hl.dsp.window.resize({ x = 0, y = -step, relative = true }), { repeating = true })
-hl.bind(mainMod .. " + ALT + Down",  hl.dsp.window.resize({ x = 0, y = step,  relative = true }), {repeating = true })
+hl.bind(mainMod .. " + ALT + SHIFT + Left",  hl.dsp.window.resize({ x = -step, y = 0, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + SHIFT + Right", hl.dsp.window.resize({ x = step,  y = 0, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + SHIFT + Up",    hl.dsp.window.resize({ x = 0, y = -step, relative = true }), { repeating = true })
+hl.bind(mainMod .. " + ALT + SHIFT + Down",  hl.dsp.window.resize({ x = 0, y = step,  relative = true }), { repeating = true })
 
 ------------------
 ---- LAUNCHER ----
@@ -141,10 +140,11 @@ hl.bind(mainMod .. " + ALT + Down",  hl.dsp.window.resize({ x = 0, y = step,  re
 hl.bind(mainMod .. " + Return",     hl.dsp.exec_cmd(launchPrefix .. EDITOR))
 hl.bind(mainMod .. " + E",          hl.dsp.exec_cmd(launchPrefix .. FILE_MANAGER))
 hl.bind(mainMod .. " + T",          hl.dsp.exec_cmd(launchPrefix .. TERMINAL))
-hl.bind(mainMod .. " + C",          hl.dsp.exec_cmd(noctCall .. "panel-toggle yuuto/calculator:panel"))
+hl.bind(mainMod .. " + C",          hl.dsp.exec_cmd("/home/bry/.local/bin/cursor-calculator"))
 hl.bind(mainMod .. " + B",          hl.dsp.exec_cmd(launchPrefix .. BROWSER))
 hl.bind("CONTROL + SHIFT + Escape", hl.dsp.exec_cmd(launchPrefix .. TERMINAL .. " -e btop"))
 hl.bind(mainMod .. " + Z",          hl.dsp.exec_cmd(noctCall .. "settings-toggle"))
+hl.bind(mainMod .. " + comma",      hl.dsp.exec_cmd("/home/bry/.local/bin/hypr-keybinds"))
 hl.bind(mainMod .. " + X",          hl.dsp.exec_cmd(noctCall .. "panel-toggle control-center"))
 hl.bind(mainMod .. " + Space",      hl.dsp.exec_cmd(noctCall .. "panel-toggle launcher"))
 hl.bind(mainMod .. " + period",     hl.dsp.exec_cmd(noctCall .. "panel-toggle liamwh/emoji-picker:desktop"))
@@ -161,6 +161,7 @@ hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd(noctCall .. "volume-down"), { lo
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd(noctCall .. "volume-mute"), { locked = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd(noctCall .. "mic-mute"),    { locked = true })
 hl.bind(mainMod .. " + A", hl.dsp.exec_cmd(noctCall .. "panel-toggle control-center audio"))
+hl.bind(mainMod .. " + ALT + A", hl.dsp.exec_cmd("/home/bry/.local/bin/toggle-audio-sink"), { locked = true })
 
 -- Media
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd(noctCall .. "media toggle"),   { locked = true })
@@ -190,17 +191,29 @@ hl.bind(mainMod .. " + ALT + W", hl.dsp.exec_cmd(noctCall .. "panel-toggle wallp
 -- Clipboard
 hl.bind(mainMod .. " + V", hl.dsp.exec_cmd(noctCall .. "panel-toggle clipboard"))
 
+-- Recover the portrait bar without restarting the desktop shell.
+hl.bind(mainMod .. " + ALT + R", hl.dsp.exec_cmd("/home/bry/.local/bin/noctalia-bar-recover"))
+
 -- Autoclicker toggle (With Notification status)
 hl.bind(mainMod .. " + ALT + K", hl.dsp.exec_cmd("/home/bry/.local/bin/autoclick-toggle"))
 
--- GPU Screen Recorder Overlay
+-- GPU Screen Recorder Overlay & Shortcuts (ShadowPlay)
 hl.bind("ALT + Z", hl.dsp.exec_cmd("gsr-ui launch-show"))
+hl.bind("ALT + C", hl.dsp.exec_cmd("gsr-ui-cli replay-save"))
+hl.bind("ALT + R", hl.dsp.exec_cmd("gsr-ui-cli toggle-record"))
 
 -----------------
 ---- TV / AV ----
 -----------------
 
 hl.bind("CONTROL + ALT + T", hl.dsp.exec_cmd("fish -c 'tv on'"))
+
+---------------------
+---- STREAM MODE ----
+---------------------
+
+-- Toggle Noctalia Stream Privacy Mode (DND notifications on/off)
+hl.bind(mainMod .. " + F10", hl.dsp.exec_cmd("/home/bry/.config/hypr/scripts/stream_mode.sh"))
 
 -------------------------------
 ---- WORKSPACES & MONITORS ----

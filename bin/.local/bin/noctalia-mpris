@@ -1,0 +1,248 @@
+#!/usr/bin/env python3
+import sys
+import subprocess
+import re
+import json
+import urllib.parse
+import time
+
+def get_players():
+    try:
+        out = subprocess.check_output(['busctl', '--user', 'list'], text=True, stderr=subprocess.DEVNULL)
+    except Exception:
+        return []
+    players = []
+    for line in out.splitlines():
+        m = re.search(r'(org\.mpris\.MediaPlayer2\.[^\s]+)', line)
+        if m:
+            p = m.group(1)
+            if 'dev.noctalia' not in p:
+                players.append(p)
+    return players
+
+def clean_name(p):
+    lower = p.lower()
+    if 'firefox' in lower or 'zen' in lower:
+        return 'Zen Browser'
+    elif 'cider' in lower:
+        return 'Cider'
+    elif 'spotify' in lower:
+        return 'Spotify'
+    elif 'chromium' in lower or 'chrome' in lower:
+        return 'Chrome'
+    elif 'mpv' in lower:
+        return 'MPV'
+    elif 'vlc' in lower:
+        return 'VLC'
+    parts = p.split('.')
+    return parts[-1].capitalize()
+
+def get_player_info(p):
+    try:
+        status_out = subprocess.check_output(
+            ['busctl', '--user', 'get-property', p, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', 'PlaybackStatus'],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+        status = status_out.split('"')[1] if '"' in status_out else status_out
+
+        meta_out = subprocess.check_output(
+            ['busctl', '--user', 'get-property', p, '/org/mpris/MediaPlayer2', 'org.mpris.MediaPlayer2.Player', 'Metadata'],
+            text=True, stderr=subprocess.DEVNULL
+        ).strip()
+
+        title_m = re.search(r'"xesam:title"\s+s\s+"([^"]+)"', meta_out)
+        title = title_m.group(1) if title_m else ''
+
+        artist_m = re.search(r'"xesam:artist"\s+as\s+\d+\s+"([^"]+)"', meta_out)
+        artist = artist_m.group(1) if artist_m else ''
+
+        album_m = re.search(r'"xesam:album"\s+s\s+"([^"]+)"', meta_out)
+        album = album_m.group(1) if album_m else ''
+
+        url_m = re.search(r'"xesam:url"\s+s\s+"([^"]+)"', meta_out)
+        url = url_m.group(1) if url_m else ''
+
+        formatted = f"{artist} - {title}" if (artist and title) else (title or artist)
+
+        return {
+            'id': p,
+            'name': clean_name(p),
+            'status': status,
+            'title': title,
+            'artist': artist,
+            'album': album,
+            'url': url,
+            'formatted': formatted
+        }
+    except Exception:
+        return None
+
+def find_target_player(pref=None):
+    players = get_players()
+    if not players:
+        return None
+    if pref:
+        for p in players:
+            if pref == p or pref in p or clean_name(p).lower() == pref.lower():
+                return p
+    infos = []
+    for p in players:
+        info = get_player_info(p)
+        if info:
+            infos.append(info)
+    for info in infos:
+        if info['status'] == 'Playing':
+            return info['id']
+    for info in infos:
+        if info['status'] == 'Paused' and (info['title'] or info['artist']):
+            return info['id']
+    return players[0]
+
+def copy_info(player_id):
+    info = get_player_info(player_id)
+    if not info:
+        return
+    text = info['formatted'] or info['title']
+    if text:
+        subprocess.run(['wl-copy', text])
+        subprocess.run([
+            'notify-send', '-a', 'Media', '-i', 'audio-card',
+            'Copied Track Info', text, '-t', '2500'
+        ])
+
+def share_discord(player_id):
+    info = get_player_info(player_id)
+    if not info:
+        return
+    text = info['formatted'] or info['title']
+    if text:
+        msg = f"🎧 Listening to {text}"
+        subprocess.run(['wl-copy', msg])
+        subprocess.run([
+            'notify-send', '-a', 'Media', '-i', 'audio-card',
+            'Copied Discord Status', msg, '-t', '2500'
+        ])
+
+def copy_url(player_id):
+    info = get_player_info(player_id)
+    if not info:
+        return
+    url = info.get('url')
+    if not url:
+        q = f"{info['artist']} {info['title']}".strip()
+        url = f"https://www.youtube.com/results?search_query={urllib.parse.quote(q)}"
+    subprocess.run(['wl-copy', url])
+    subprocess.run([
+        'notify-send', '-a', 'Media', '-i', 'link',
+        'Copied Track URL', url, '-t', '2500'
+    ])
+
+def focus_player(player_id):
+    info = get_player_info(player_id)
+    target_class = 'zen'
+    if info:
+        lower = info['name'].lower()
+        if 'zen' in lower or 'firefox' in lower:
+            target_class = 'zen'
+        elif 'cider' in lower:
+            target_class = 'cider'
+        elif 'spotify' in lower:
+            target_class = 'spotify'
+        elif 'vlc' in lower:
+            target_class = 'vlc'
+        elif 'mpv' in lower:
+            target_class = 'mpv'
+
+    lua = f'''for _, w in ipairs(hl.get_windows()) do
+        if w.class and w.class:lower():match("{target_class}") then
+            if w.workspace and w.workspace.monitor then
+                hl.dispatch(hl.dsp.focus({{ monitor = w.workspace.monitor.name }}))
+            end
+            if w.workspace then
+                hl.dispatch(hl.dsp.focus({{ workspace = tostring(w.workspace.id) }}))
+            end
+            hl.dispatch(hl.dsp.focus({{ window = w }}))
+            if w.at and w.size then
+                local cx = math.floor(w.at.x + w.size.x / 2)
+                local cy = math.floor(w.at.y + w.size.y / 2)
+                hl.dispatch(hl.dsp.cursor.move({{ x = cx, y = cy }}))
+            end
+            break
+        end
+    end'''
+    subprocess.run(['hyprctl', 'repl', lua])
+    time.sleep(0.12)
+    subprocess.run(['hyprctl', 'repl', lua])
+
+def search_lyrics(player_id):
+    info = get_player_info(player_id)
+    if not info:
+        return
+    q = f"{info['artist']} {info['title']} lyrics".strip()
+    url = f"https://www.google.com/search?q={urllib.parse.quote(q)}"
+    subprocess.run(['/home/bry/.config/hypr/scripts/open_and_focus.sh', url])
+
+def main():
+    action = sys.argv[1] if len(sys.argv) > 1 else 'status'
+    target = sys.argv[2] if len(sys.argv) > 2 else None
+
+    if action == 'status':
+        players = get_players()
+        results = []
+        for p in players:
+            info = get_player_info(p)
+            if info and (info['title'] or info['status'] != 'Stopped'):
+                results.append(info)
+        results.sort(key=lambda x: (0 if x['status'] == 'Playing' else 1, x['name']))
+        print(json.dumps(results))
+        return
+
+    player = target if (target and 'org.mpris' in target) else find_target_player(target)
+
+    if action == 'copy-info':
+        copy_info(player or target)
+        return
+    if action == 'share-discord':
+        share_discord(player or target)
+        return
+    if action == 'copy-url':
+        copy_url(player or target)
+        return
+    if action == 'jump':
+        focus_player(player or target)
+        return
+    if action == 'lyrics':
+        search_lyrics(player or target)
+        return
+
+    if not player:
+        if action in ['toggle', 'play-pause']:
+            subprocess.run(['noctalia', 'msg', 'media', 'toggle'])
+        elif action == 'next':
+            subprocess.run(['noctalia', 'msg', 'media', 'next'])
+        elif action in ['prev', 'previous']:
+            subprocess.run(['noctalia', 'msg', 'media', 'previous'])
+        return
+
+    method_map = {
+        'toggle': 'PlayPause',
+        'play-pause': 'PlayPause',
+        'play': 'Play',
+        'pause': 'Pause',
+        'next': 'Next',
+        'prev': 'Previous',
+        'previous': 'Previous',
+        'stop': 'Stop'
+    }
+
+    method = method_map.get(action, 'PlayPause')
+    subprocess.run([
+        'busctl', '--user', 'call',
+        player,
+        '/org/mpris/MediaPlayer2',
+        'org.mpris.MediaPlayer2.Player',
+        method
+    ])
+
+if __name__ == '__main__':
+    main()

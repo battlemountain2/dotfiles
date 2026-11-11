@@ -1,0 +1,126 @@
+#!/usr/bin/python3
+"""Search live Hyprland bindings using Noctalia; selection copies the shortcut."""
+
+import argparse
+import json
+import subprocess
+import sys
+
+
+LABELS = {
+    "Super+Q": "Close focused window", "Super+Shift+Q": "Force-kill focused window's process",
+    "Super+F": "Toggle floating", "Super+Alt+Space": "Toggle floating",
+    "Super+W": "Toggle maximized", "Super+Shift+W": "Toggle fullscreen",
+    "Super+J": "Toggle split (legacy dwindle action)", "Super+Shift+P": "Pin floating window",
+    "Super+P": "Color picker", "Alt+Tab": "Noctalia window switcher",
+    "Super+Alt+1": "Focus AOC monitor", "Super+Alt+2": "Focus portrait LG monitor",
+    "Super+Alt+mouse_up": "Move window to AOC monitor", "Super+Alt+mouse_down": "Move window to portrait LG monitor",
+    "Super+Ctrl+mouse_up": "Previous carousel column / move window to previous workspace",
+    "Super+Ctrl+mouse_down": "Next carousel column / move window to next workspace",
+    "Super+Return": "Open Zed editor", "Super+E": "Open Dolphin file manager",
+    "Super+T": "Open Kitty terminal", "Super+C": "Calculator panel", "Super+B": "Open Zen Browser",
+    "Ctrl+Shift+Escape": "Open btop system monitor", "Super+Z": "Noctalia settings",
+    "Super+comma": "Search keybinds", "Super+X": "Control center", "Super+Space": "App launcher",
+    "Super+period": "Emoji picker", "Super+L": "Lock session", "Super+Alt+C": "Session and power menu",
+    "Super+A": "Audio controls", "Super+Alt+A": "Switch headphones / speakers",
+    "Super+M": "Media controls", "Super+Alt+P": "Pick and copy a screen color",
+    "Print": "Screenshot region", "Super+Print": "Screenshot monitor",
+    "Super+Alt+W": "Wallpaper picker", "Super+V": "Clipboard history",
+    "Super+Alt+R": "Refresh frozen portrait bar", "Super+Alt+K": "Toggle autoclicker",
+    "Alt+Z": "GPU Screen Recorder overlay", "Ctrl+Alt+T": "Wake TV",
+    "Super+F10": "Toggle streaming Do Not Disturb", "Super+Home": "Focus empty workspace on current monitor",
+    "Super+G": "Focus gaming workspace 9", "Super+S": "Toggle scratchpad",
+    "Super+Alt+S": "Move window into scratchpad", "Super+Shift+S": "Pull window out of scratchpad",
+    "Super+mouse_down": "Next workspace on monitor", "Super+mouse_up": "Previous workspace on monitor",
+    "Super+Ctrl+XF86AudioRaiseVolume": "Next existing workspace", "Super+Ctrl+XF86AudioLowerVolume": "Previous existing workspace",
+    "Super+Shift+mouse_up": "Zoom desktop in", "Super+Shift+mouse_down": "Zoom desktop out",
+    "Super+mouse:272": "Drag window", "Super+mouse:273": "Resize window with mouse",
+    "Super+Tab": "Toggle ScrollOverview",
+    "XF86AudioRaiseVolume": "Raise volume", "XF86AudioLowerVolume": "Lower volume",
+    "XF86AudioMute": "Toggle audio mute", "XF86AudioMicMute": "Toggle microphone mute",
+    "XF86AudioPlay": "Toggle playback", "XF86AudioPause": "Toggle playback",
+    "XF86AudioNext": "Next track", "XF86AudioPrev": "Previous track",
+    "XF86MonBrightnessUp": "Raise brightness", "XF86MonBrightnessDown": "Lower brightness",
+}
+for key in ("Left", "Right", "Up", "Down"):
+    direction = key.lower()
+    LABELS["Super+" + key] = "Focus window " + direction
+    LABELS["Super+Shift+" + key] = "Move window " + direction
+    LABELS["Super+Alt+" + key] = "Focus monitor " + direction
+    LABELS["Super+Alt+Shift+" + key] = "Resize window " + direction
+    LABELS["Super+Ctrl+" + key] = (
+        "Focus previous numbered workspace" if key == "Left" else
+        "Focus next numbered workspace" if key == "Right" else
+        "Move window to previous workspace and follow" if key == "Up" else
+        "Move window to next workspace and follow")
+for key in ("Left", "Right", "mouse_up", "mouse_down"):
+    LABELS["Super+Ctrl+Shift+" + key] = "Move window to " + (
+        "previous" if key in ("Left", "mouse_up") else "next") + " workspace" + (
+        " without following" if key.startswith("mouse") else " and follow")
+for number in range(10):
+    workspace = number or 10
+    LABELS[f"Super+{number}"] = f"Focus workspace {workspace}"
+    LABELS[f"Super+Shift+{number}"] = f"Move window to workspace {workspace} and follow"
+    if number:
+        LABELS[f"Super+Ctrl+Shift+{number}"] = f"Move window to workspace {number} without following"
+
+
+def chord(binding):
+    mask = binding["modmask"]
+    modifiers = [name for bit, name in ((64, "Super"), (4, "Ctrl"), (8, "Alt"), (1, "Shift")) if mask & bit]
+    key = binding.get("key") or "code:" + str(binding.get("keycode", 0))
+    return "+".join(modifiers + [key])
+
+
+def describe(binding):
+    key = chord(binding)
+    if binding.get("description"):
+        return binding["description"]
+    if binding.get("submap") == "scrolloverview":
+        return {"Super+Q": "Close overview window under pointer", "mouse:272": "Select overview window",
+                "Super+Up": "Navigate overview up", "Super+Down": "Navigate overview down",
+                "escape": "Close overview", "Super+Tab": "Close overview"}.get(key, "Overview control")
+    if key in LABELS:
+        return LABELS[key]
+    return "Custom Lua action" if binding.get("dispatcher") == "__lua" else (
+        binding.get("dispatcher", "Action") + " " + binding.get("arg", "")).strip()
+
+
+def items(bindings):
+    result = set()
+    for binding in bindings:
+        prefix = f"[{binding['submap']}] " if binding.get("submap") else ""
+        key = chord(binding)
+        result.add(f"{prefix}{key:<36}  {describe(binding)}")
+    return sorted(result, key=str.casefold)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--list", action="store_true", help="Print the searchable list without opening the picker")
+    args = parser.parse_args()
+    result = subprocess.run(["hyprctl", "binds", "-j"], capture_output=True, text=True, timeout=5, check=True)
+    entries = items(json.loads(result.stdout))
+    if args.list:
+        print("\n".join(entries))
+        return
+    selected = subprocess.run(["noctalia", "dmenu", "--prompt", "Keybinds"],
+                              input="\n".join(entries) + "\n", capture_output=True, text=True)
+    value = selected.stdout.strip()
+    if not value:
+        if selected.returncode not in (0, 1):
+            raise RuntimeError(selected.stderr.strip() or "Could not open keybind picker")
+        return
+    if value not in entries:
+        return
+    shortcut = value.split("  ", 1)[0].strip()
+    subprocess.run(["wl-copy"], input=shortcut, text=True, check=True, timeout=5)
+    subprocess.run(["notify-send", "-a", "Keybinds", "Shortcut copied", value], check=False, timeout=5)
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
+        print(f"Keybinds: {error}", file=sys.stderr)
+        sys.exit(1)
