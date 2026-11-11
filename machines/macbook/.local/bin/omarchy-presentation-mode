@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# Smart Classroom Projector / Presentation Mode Toggle
+# Toggles between Mirror Mode and Extended Desktop on connected external displays
+
+EXT_MONITOR=$(hyprctl monitors all -j | jq -r '.[] | select(.name != "eDP-1" and .disabled == false) | .name' | head -n 1)
+
+if [[ -z "$EXT_MONITOR" ]]; then
+    # Check if there is an external monitor that is disabled/disconnected
+    ALL_EXT=$(hyprctl monitors all -j | jq -r '.[] | select(.name != "eDP-1") | .name' | head -n 1)
+    if [[ -n "$ALL_EXT" ]]; then
+        EXT_MONITOR="$ALL_EXT"
+    fi
+fi
+
+if [[ -z "$EXT_MONITOR" ]]; then
+    notify-send -u low -a "Presentation Mode" -i video-display "Presentation Mode" "No external projector or display detected"
+    exit 0
+fi
+
+# Check if currently mirrored
+IS_MIRRORED=$(hyprctl monitors -j | jq -r --arg ext "$EXT_MONITOR" '.[] | select(.name == $ext) | .mirrorOf')
+
+if [[ "$IS_MIRRORED" == "eDP-1" ]]; then
+    # Switch to extended mode
+    hyprctl keyword monitor "$EXT_MONITOR,preferred,auto,1"
+    notify-send -u low -a "Presentation Mode" -i video-display "Presentation Mode: Extended" "External display ($EXT_MONITOR) extended to the right"
+else
+    # Switch to mirror mode (ideal for presentations & slides)
+    hyprctl keyword monitor "$EXT_MONITOR,preferred,auto,1,mirror,eDP-1"
+    notify-send -u low -a "Presentation Mode" -i video-display "Presentation Mode: Mirrored" "Screen mirrored to projector ($EXT_MONITOR)"
+fi

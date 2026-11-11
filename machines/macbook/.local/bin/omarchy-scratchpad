@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+mkdir -p "$HOME/notes"
+NOTE_FILE="$HOME/notes/scratchpad.md"
+[[ ! -f "$NOTE_FILE" ]] && touch "$NOTE_FILE"
+
+# Check if scratchpad-notes window is open
+if ! hyprctl clients -j | jq -e '.[] | select(.class=="scratchpad-notes")' >/dev/null 2>&1; then
+    kitty --class scratchpad-notes -e nvim "$NOTE_FILE" &
+    sleep 0.25
+fi
+
+hyprctl eval 'hl.dsp.workspace.toggle_special("scratchpad")' >/dev/null

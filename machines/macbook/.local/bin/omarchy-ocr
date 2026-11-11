@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+TMP_IMG=$(mktemp /tmp/ocr-XXXXXX.png)
+
+if grim -g "$(slurp -d)" "$TMP_IMG" 2>/dev/null; then
+    if [[ -s "$TMP_IMG" ]]; then
+        TEXT=$(tesseract "$TMP_IMG" stdout 2>/dev/null)
+        if [[ -n "$TEXT" ]]; then
+            # Clean up trailing whitespace
+            CLEAN_TEXT=$(echo "$TEXT" | sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba')
+            echo -n "$CLEAN_TEXT" | wl-copy
+            PREVIEW=$(echo "$CLEAN_TEXT" | head -n 2 | tr '\n' ' ')
+            notify-send -u low -a "OCR Grabber" -i edit-copy "Text Captured" "Copied to clipboard: \"$PREVIEW\""
+        else
+            notify-send -u low -a "OCR Grabber" -i dialog-warning "OCR Grabber" "No readable text detected"
+        fi
+    fi
+fi
+rm -f "$TMP_IMG"

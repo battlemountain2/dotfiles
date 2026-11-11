@@ -1,0 +1,96 @@
+#!/bin/bash
+# omarchy-display-rate: Helper script for MacBook ProMotion 120Hz / Battery Saver 60Hz switching
+# Output: eDP-1 (Apple Liquid Retina XDR 3024x1890, scale 2)
+
+set -euo pipefail
+
+OUTPUT="eDP-1"
+SCALE="2"
+MODE_120="3024x1890@120"
+MODE_60="3024x1890@60"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/omarchy"
+mkdir -p "$STATE_DIR"
+PROMPTED_FLAG="$STATE_DIR/battery_saver_prompted"
+
+get_rate() {
+  local rate
+  rate=$(hyprctl monitors -j | jq -r '.[0].refreshRate | floor' 2>/dev/null || echo "120")
+  echo "$rate"
+}
+
+set_rate() {
+  local target="$1"
+  local notify="${2:-1}"
+
+  if [[ "$target" == "60" ]]; then
+    hyprctl eval "hl.monitor({ output = \"$OUTPUT\", mode = \"$MODE_60\", position = \"0x0\", scale = $SCALE })" >/dev/null
+    if ((notify)); then
+      omarchy-notification-send "Battery Saver Enabled" "Display set to 60Hz" -g "󰂃" -u low || true
+    fi
+  elif [[ "$target" == "120" ]]; then
+    hyprctl eval "hl.monitor({ output = \"$OUTPUT\", mode = \"$MODE_120\", position = \"0x0\", scale = $SCALE })" >/dev/null
+    rm -f "$PROMPTED_FLAG"
+    if ((notify)); then
+      omarchy-notification-send "ProMotion Restored" "Display set to 120Hz" -g "󰍹" -u low || true
+    fi
+  else
+    echo "Unknown rate: $target (use 60 or 120)" >&2
+    exit 1
+  fi
+}
+
+toggle_rate() {
+  local current
+  current=$(get_rate)
+  if ((current >= 100)); then
+    set_rate 60 1
+  else
+    set_rate 120 1
+  fi
+}
+
+prompt_low_battery() {
+  local pct="${1:-20}"
+  local current
+  current=$(get_rate)
+
+  # Only prompt if currently running at high refresh rate (>=100Hz)
+  if ((current >= 100)); then
+    if [[ ! -f "$PROMPTED_FLAG" ]]; then
+      touch "$PROMPTED_FLAG"
+      omarchy-notification-send "Battery Saver Available" "Battery at ${pct}%. Click to switch to 60Hz, or dismiss/ignore to stay at 120Hz." -g "󰂃" -u normal --exec omarchy-display-rate set 60
+    fi
+  fi
+}
+
+restore_on_ac() {
+  # When plugged into AC power, clear prompted flag and restore 120Hz if it was lowered
+  rm -f "$PROMPTED_FLAG"
+  local current
+  current=$(get_rate)
+  if ((current < 100)); then
+    set_rate 120 1
+  fi
+}
+
+case "${1:-get}" in
+  get)
+    get_rate
+    ;;
+  set)
+    set_rate "${2:-120}" "${3:-1}"
+    ;;
+  toggle)
+    toggle_rate
+    ;;
+  prompt-low-battery)
+    prompt_low_battery "${2:-20}"
+    ;;
+  restore-ac)
+    restore_on_ac
+    ;;
+  *)
+    echo "Usage: $0 {get|set 60|set 120|toggle|prompt-low-battery [pct]|restore-ac}" >&2
+    exit 1
+    ;;
+esac

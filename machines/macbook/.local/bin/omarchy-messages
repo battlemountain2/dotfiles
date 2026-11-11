@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# iMessage / SMS Hub summoner via BlueFerry
+omarchy-launch-or-focus "blueferry-tui" "kitty --class blueferry-tui --title 'Messages (iPhone)' -o initial_window_width=90c -o initial_window_height=26c -e blueferry tui"

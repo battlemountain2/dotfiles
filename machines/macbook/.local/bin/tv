@@ -1,0 +1,302 @@
+#!/usr/bin/env python3
+"""
+tv & movie CLI for Onn TV 4K Pro (Android TV) + LG TV.
+Usage:
+  tv on                  - Power on TV (Wake-on-LAN + HDMI-CEC wakeup)
+  tv off                 - Power off / sleep TV (KEYCODE_SLEEP)
+  tv status              - Check TV connection status
+  tv launch <app>        - Launch app (paramount, netflix, hbo, yt, stremio, etc.)
+  tv play [query]        - Search & open TV show in Stremio
+  movie [play] [query]   - Search & open movie in Stremio
+"""
+
+import sys
+import os
+import socket
+import subprocess
+import urllib.parse
+
+TV_IP = "10.0.0.108"
+TV_PORT = "5555"
+TV_ADDR = f"{TV_IP}:{TV_PORT}"
+
+# MAC addresses for Wake-on-LAN:
+# LG TV (Display): a4:36:c7:03:c6:24
+# Onn TV (Streamer): 58:e4:eb:a3:4c:9e
+MACS = [
+    "a4:36:c7:03:c6:24",
+    "58:e4:eb:a3:4c:9e"
+]
+
+ADB_BIN = os.path.expanduser("~/.local/bin/adb")
+if not os.path.exists(ADB_BIN):
+    ADB_BIN = "adb"
+
+# Supported TV streaming apps on the Onn 4K Pro:
+APPS = {
+    "paramount": ("Paramount+", "com.cbs.ott"),
+    "paramount+": ("Paramount+", "com.cbs.ott"),
+    "netflix": ("Netflix", "com.netflix.ninja"),
+    "hbo": ("Max (HBO)", "com.wbd.stream"),
+    "max": ("Max (HBO)", "com.wbd.stream"),
+    "hbomax": ("Max (HBO)", "com.wbd.stream"),
+    "yt": ("SmartTube", "org.smarttube.stable"),
+    "youtube": ("SmartTube", "org.smarttube.stable"),
+    "smarttube": ("SmartTube", "org.smarttube.stable"),
+    "stremio": ("Stremio", "com.stremio.one"),
+    "disney": ("Disney+", "com.disney.disneyplus"),
+    "disney+": ("Disney+", "com.disney.disneyplus"),
+    "hulu": ("Hulu", "com.hulu.livingroomplus"),
+    "prime": ("Prime Video", "com.amazon.amazonvideo.livingroom"),
+    "amazon": ("Prime Video", "com.amazon.amazonvideo.livingroom"),
+    "twitch": ("Twitch", "tv.twitch.android.app"),
+    "spotify": ("Spotify", "com.spotify.tv.android"),
+    "crunchyroll": ("Crunchyroll", "com.crunchyroll.crunchyroid"),
+    "tubi": ("Tubi", "com.tubitv"),
+}
+
+_tv_already_turned_on = False
+
+
+def send_wol(mac: str):
+    """Send a Wake-on-LAN magic packet via UDP broadcast."""
+    try:
+        clean_mac = mac.replace(":", "").replace("-", "")
+        payload = b"\xff" * 6 + bytes.fromhex(clean_mac) * 16
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            s.sendto(payload, ("255.255.255.255", 9))
+    except Exception as e:
+        print(f"WoL error for {mac}: {e}", file=sys.stderr)
+
+
+def adb_cmd(*args, timeout=5):
+    """Run an adb command targeting the TV."""
+    cmd = [ADB_BIN, "-s", TV_ADDR] + list(args)
+    try:
+        res = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+        return res.returncode == 0, res.stdout.strip(), res.stderr.strip()
+    except subprocess.TimeoutExpired:
+        return False, "", "Timed out"
+    except Exception as e:
+        return False, "", str(e)
+
+
+def ensure_connected():
+    """Ensure ADB is connected to the Onn TV."""
+    try:
+        subprocess.run([ADB_BIN, "connect", TV_ADDR], capture_output=True, timeout=4)
+    except Exception:
+        pass
+
+
+def cmd_on(quiet=False):
+    """Turns on the TV via Wake-on-LAN and sends KEYCODE_WAKEUP via ADB."""
+    global _tv_already_turned_on
+    if _tv_already_turned_on:
+        return
+
+    if not quiet:
+        print("Turning on TV...")
+    for mac in MACS:
+        send_wol(mac)
+    ensure_connected()
+    # 224 = KEYCODE_WAKEUP (wakes screen & triggers HDMI-CEC TV power-on)
+    ok, stdout, stderr = adb_cmd("shell", "input", "keyevent", "224")
+    _tv_already_turned_on = True
+    if not quiet:
+        if ok:
+            print("✓ TV turned on (WAKEUP sent via ADB)")
+        else:
+            print("✓ Wake-on-LAN packet sent to TV")
+
+
+def cmd_off():
+    print("Turning off TV...")
+    ensure_connected()
+    # 223 = KEYCODE_SLEEP
+    ok, stdout, stderr = adb_cmd("shell", "input", "keyevent", "223")
+    if ok:
+        print("✓ TV put to sleep")
+    else:
+        print(f"Failed to send sleep command: {stderr}", file=sys.stderr)
+
+
+def cmd_status():
+    ensure_connected()
+    res = subprocess.run([ADB_BIN, "devices"], capture_output=True, text=True)
+    lines = res.stdout.strip().splitlines()
+    found = False
+    for line in lines[1:]:
+        if TV_IP in line:
+            found = True
+            state = line.split()[-1]
+            print(f"TV at {TV_ADDR}: {state}")
+            if state == "unauthorized":
+                print("\n⚠️  Please check your TV screen and accept the 'Allow USB debugging' prompt!")
+    if not found:
+        print(f"TV at {TV_ADDR} is currently offline or unreachable.")
+
+
+def cmd_launch(target: str):
+    # Automatically turn on the TV whenever a launch command is invoked
+    cmd_on()
+
+    if not target:
+        print("\nAvailable apps to launch:")
+        for name in ["paramount", "netflix", "hbo", "yt (SmartTube)", "stremio", "disney", "hulu", "prime", "twitch", "crunchyroll"]:
+            print(f"  - {name}")
+        try:
+            target = input("\nEnter app to launch: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nCanceled.")
+            return
+
+    key = target.lower().strip()
+    entry = APPS.get(key)
+    if not entry:
+        for k, v in APPS.items():
+            if key in k:
+                entry = v
+                break
+
+    if not entry:
+        print(f"Unknown app: '{target}'.")
+        print(f"Supported apps: {', '.join(sorted(set(k for k in APPS.keys() if len(k) > 2)))}")
+        return
+
+    display_name, pkg = entry
+    print(f"Launching {display_name} on TV...")
+
+    # Launch app via monkey (reliable across leanback and main activities)
+    ok, out, err = adb_cmd("shell", "monkey", "-p", pkg, "-c", "android.intent.category.LAUNCHER", "1")
+    if not ok:
+        ok, out, err = adb_cmd("shell", "monkey", "-p", pkg, "1")
+
+    if ok:
+        print(f"✓ Launched {display_name}")
+        try:
+            subprocess.run([
+                "notify-send",
+                "-a", "TV",
+                "-i", "video-television",
+                f"TV: {display_name}",
+                f"Launched on Onn TV 4K Pro"
+            ], capture_output=True)
+        except Exception:
+            pass
+    else:
+        print(f"Failed to launch {display_name}: {err or out}", file=sys.stderr)
+
+
+def cmd_play(query: str, media_type: str = "title"):
+    # Automatically turn on the TV immediately
+    cmd_on()
+
+    if not query:
+        prompt_text = f"Enter {media_type} to search on Stremio: "
+        try:
+            query = input(prompt_text).strip()
+        except (KeyboardInterrupt, EOFError):
+            print("\nCanceled.")
+            return
+
+    if not query:
+        print("No search query provided.")
+        return
+
+    print(f"Searching Stremio for '{query}' on TV...")
+
+    encoded = urllib.parse.quote(query)
+    deep_link = f"stremio:///search?search={encoded}"
+
+    # Send intent directly to Stremio TV MainActivity
+    cmd_args = [
+        "shell", "am", "start",
+        "-n", "com.stremio.one/com.stremio.tv.MainActivity",
+        "-a", "android.intent.action.VIEW",
+        "-d", deep_link
+    ]
+    ok, out, err = adb_cmd(*cmd_args)
+    if ok:
+        print(f"✓ Opened Stremio search for '{query}' on TV")
+        try:
+            subprocess.run([
+                "notify-send",
+                "-a", "Stremio",
+                "-i", "video-television",
+                f"Playing on TV: {query}",
+                f"Launched Stremio search for '{query}'"
+            ], capture_output=True)
+        except Exception:
+            pass
+    else:
+        # Fallback: launch Stremio package directly if deep link fails
+        if "unauthorized" in err or "unauthorized" in out:
+            print("⚠️  TV is waiting for ADB authorization. Please check TV screen and select 'Always allow'.")
+        else:
+            print(f"Note: {out or err}")
+            print("Attempting direct package launch...")
+            adb_cmd("shell", "monkey", "-p", "com.stremio.one", "1")
+
+
+def main():
+    script_name = os.path.basename(sys.argv[0])
+    args = sys.argv[1:]
+
+    # If invoked as 'movie'
+    if "movie" in script_name:
+        if args and args[0] == "play":
+            query = " ".join(args[1:])
+            cmd_play(query, media_type="movie")
+        elif args:
+            query = " ".join(args)
+            cmd_play(query, media_type="movie")
+        else:
+            cmd_play("", media_type="movie")
+        return
+
+    # Invoked as 'tv'
+    if not args:
+        cmd_on()
+        print("\nWhat would you like to do?")
+        print("  - Type a show name to search Stremio")
+        print("  - Type an app name (yt, netflix, hbo, paramount, etc.)")
+        print("  - Press Enter to leave TV on\n")
+        try:
+            choice = input("Choice: ").strip()
+        except (KeyboardInterrupt, EOFError):
+            print("")
+            return
+        if not choice:
+            return
+        if choice.lower() in APPS:
+            cmd_launch(choice)
+        else:
+            cmd_play(choice, media_type="show")
+        return
+
+    sub = args[0].lower()
+    if sub == "on":
+        cmd_on()
+    elif sub == "off":
+        cmd_off()
+    elif sub == "status":
+        cmd_status()
+    elif sub in ("launch", "app", "open"):
+        target = " ".join(args[1:])
+        cmd_launch(target)
+    elif sub in APPS:
+        # Direct shortcut e.g. `tv yt` or `tv netflix`
+        cmd_launch(sub)
+    elif sub == "play":
+        query = " ".join(args[1:])
+        cmd_play(query, media_type="show")
+    else:
+        # If user runs `tv "Breaking Bad"`, treat as play
+        query = " ".join(args)
+        cmd_play(query, media_type="show")
+
+
+if __name__ == "__main__":
+    main()

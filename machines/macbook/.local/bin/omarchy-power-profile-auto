@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""
+omarchy-power-profile-auto
+
+1. Monitors AC / Battery power transitions via UPower D-Bus:
+   - Disconnected (On Battery) -> power-saver
+   - Plugged In (On AC)        -> balanced
+2. Interactive 20% Battery Alert:
+   - When discharging drops to <= 20%, presents an actionable notification:
+     [ Drop to 60Hz & Power Saver ]  [ Keep 120Hz ]
+   - If selected, sets display refresh rate to 60Hz and enforces power-saver.
+"""
+
+import sys
+import subprocess
+import threading
+import gi
+
+gi.require_version("Gio", "2.0")
+gi.require_version("GLib", "2.0")
+from gi.repository import Gio, GLib
+
+has_alerted_20_percent = False
+
+
+def get_current_profile():
+    try:
+        res = subprocess.check_output(["powerprofilesctl", "get"], text=True, stderr=subprocess.DEVNULL)
+        return res.strip()
+    except Exception:
+        return ""
+
+
+def apply_profile(on_battery: bool, notify: bool = True):
+    target = "power-saver" if on_battery else "balanced"
+    current = get_current_profile()
+
+    if current == target:
+        return
+
+    try:
+        subprocess.run(["powerprofilesctl", "set", target], check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        print(f"[power-auto] Changed profile: {current} -> {target} (on_battery={on_battery})", flush=True)
+
+        if notify:
+            title = "Power Profile"
+            if on_battery:
+                body = "Switched to Power Saver (Battery)"
+                icon = "battery-profile-power-saver"
+            else:
+                body = "Switched to Balanced (AC Connected)"
+                icon = "battery-profile-balanced"
+
+            subprocess.run([
+                "notify-send",
+                "-u", "low",
+                "-a", "Power Manager",
+                "-h", "string:x-canonical-private-synchronous:power-profile",
+                "-i", icon,
+                title,
+                body
+            ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    except Exception as e:
+        print(f"[power-auto] Error setting profile {target}: {e}", file=sys.stderr, flush=True)
+
+
+def prompt_low_battery_action():
+    """Runs interactive notification in background thread so D-Bus loop doesn't stall"""
+    def _prompt():
+        try:
+            print("[power-auto] Prompting user: low battery 20% action", flush=True)
+            res = subprocess.run([
+                "notify-send",
+                "-u", "critical",
+                "-a", "Battery Monitor",
+                "-i", "battery-caution",
+                "--action=save=Drop to 60Hz & Power Saver",
+                "--action=dismiss=Keep 120Hz",
+                "Low Battery (20%)",
+                "Switch display to 60Hz and power-saver to conserve battery?"
+            ], capture_output=True, text=True)
+
+            action = res.stdout.strip()
+            print(f"[power-auto] Low battery prompt response: '{action}'", flush=True)
+
+            if action == "save":
+                subprocess.run(["/home/bry/.local/bin/omarchy-display-rate", "60"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(["powerprofilesctl", "set", "power-saver"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run([
+                    "notify-send",
+                    "-u", "low",
+                    "-a", "Battery Monitor",
+                    "-i", "battery-profile-power-saver",
+                    "Battery Saver Active",
+                    "Display set to 60Hz and profile set to power-saver"
+                ], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        except Exception as e:
+            print(f"[power-auto] Low battery prompt error: {e}", file=sys.stderr, flush=True)
+
+    t = threading.Thread(target=_prompt, daemon=True)
+    t.start()
+
+
+def check_battery_threshold(proxy_bat):
+    global has_alerted_20_percent
+    try:
+        pct_prop = proxy_bat.get_cached_property("Percentage")
+        state_prop = proxy_bat.get_cached_property("State")
+
+        if pct_prop is None or state_prop is None:
+            return
+
+        percentage = pct_prop.get_double()
+        state = state_prop.get_uint32()
+        # State: 1 = charging, 2 = discharging, 4 = fully charged
+
+        if state == 2 and percentage <= 20.5:
+            if not has_alerted_20_percent:
+                has_alerted_20_percent = True
+                prompt_low_battery_action()
+        elif percentage > 25.0 or state != 2:
+            # Reset alert flag when charging or above threshold
+            has_alerted_20_percent = False
+    except Exception as e:
+        print(f"[power-auto] check_battery_threshold error: {e}", file=sys.stderr)
+
+
+def main():
+    try:
+        bus = Gio.bus_get_sync(Gio.BusType.SYSTEM, None)
+        proxy_upower = Gio.DBusProxy.new_sync(
+            bus,
+            Gio.DBusProxyFlags.NONE,
+            None,
+            "org.freedesktop.UPower",
+            "/org/freedesktop/UPower",
+            "org.freedesktop.UPower",
+            None,
+        )
+
+        proxy_bat = Gio.DBusProxy.new_sync(
+            bus,
+            Gio.DBusProxyFlags.NONE,
+            None,
+            "org.freedesktop.UPower",
+            "/org/freedesktop/UPower/devices/battery_macsmc_battery",
+            "org.freedesktop.UPower.Device",
+            None,
+        )
+    except Exception as e:
+        print(f"[power-auto] Failed to connect to UPower D-Bus: {e}", file=sys.stderr)
+        sys.exit(1)
+
+    # Apply initial power profile state on startup (silent)
+    val = proxy_upower.get_cached_property("OnBattery")
+    if val is not None:
+        initial_on_battery = val.get_boolean()
+        print(f"[power-auto] Initial state: OnBattery={initial_on_battery}", flush=True)
+        apply_profile(initial_on_battery, notify=False)
+
+    check_battery_threshold(proxy_bat)
+
+    # Listen for power supply AC transitions
+    def on_upower_changed(proxy, changed_properties, invalidated_properties):
+        changed = changed_properties.unpack()
+        if "OnBattery" in changed:
+            on_bat = bool(changed["OnBattery"])
+            print(f"[power-auto] Power source transition detected: OnBattery={on_bat}", flush=True)
+            apply_profile(on_bat, notify=True)
+
+    # Listen for battery percentage/state changes
+    def on_bat_changed(proxy, changed_properties, invalidated_properties):
+        check_battery_threshold(proxy_bat)
+
+    proxy_upower.connect("g-properties-changed", on_upower_changed)
+    proxy_bat.connect("g-properties-changed", on_bat_changed)
+
+    loop = GLib.MainLoop()
+    try:
+        loop.run()
+    except (KeyboardInterrupt, SystemExit):
+        pass
+
+
+if __name__ == "__main__":
+    main()

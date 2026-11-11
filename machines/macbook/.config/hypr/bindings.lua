@@ -141,7 +141,31 @@ o.bind("SUPER + SHIFT + code:14", "Capture menu",         "omarchy-menu toggle c
 -- ---------------------------------------------------------------------------
 -- Control Center
 -- ---------------------------------------------------------------------------
+o.bind("SUPER + SHIFT + Z", "Control Center", "omarchy-shell shell toggle bry.control-center")
 o.bind("SUPER + BACKSLASH", "Control Center", "omarchy-shell shell toggle bry.control-center")
+
+-- ---------------------------------------------------------------------------
+-- School & Productivity Enhancements
+-- ---------------------------------------------------------------------------
+-- Instant OCR / Slide & Math Grabber
+hl.unbind("SUPER + SHIFT + O")
+o.bind("SUPER + SHIFT + O", "OCR Slide Grabber", "omarchy-ocr")
+
+-- Quake-style drop-down notes scratchpad
+o.bind("SUPER + N", "Drop-down scratchpad", "omarchy-scratchpad")
+
+-- Instant Floating Omacalc (Cmd + Option + C)
+o.bind("SUPER + ALT + C", "Calculator", "omarchy-calc-toggle")
+
+-- Smart Classroom Projector / Presentation Mode (Mirror vs Extended)
+o.bind("SUPER + ALT + P", "Classroom Presentation Mode", "omarchy-presentation-mode")
+
+-- Push-to-Talk / Toggle Voice Dictation (Whisper)
+o.bind("SUPER + SHIFT + V", "Toggle voice dictation", "voxtype record toggle")
+
+-- Phone Bridge: Messages (Cmd + Shift + I) and AirDrop (Cmd + Option + A)
+o.bind("SUPER + SHIFT + I", "iPhone Messages", "omarchy-messages")
+o.bind("SUPER + ALT + A", "AirDrop (LocalSend)", "omarchy-airdrop")
 
 -- ---------------------------------------------------------------------------
 -- Lid Open / Wake
@@ -149,4 +173,5 @@ o.bind("SUPER + BACKSLASH", "Control Center", "omarchy-shell shell toggle bry.co
 -- On lid open, restore clamshell and refresh WirePlumber so suspended USB audio
 -- devices don't leave PipeWire in an error loop that stalls browser video playback.
 o.bind("switch:off:Lid Switch", nil, "bash -c 'omarchy-hyprland-monitor-clamshell; systemctl --user restart wireplumber'", { locked = true })
+
 

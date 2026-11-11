@@ -1,5 +1,10 @@
-# Omarchy add-ons
+## User-Authored Plugins
+The snapshot vendors these custom local plugins under `.config/omarchy/plugins/`:
 
+- `bry.control-center`: Full-featured Mac-inspired Control Center with sliders (brightness, keyboard backlight, volume), quick toggles (Wi-Fi, Bluetooth, Night Light, Stay Awake, DND, Mic, 120Hz/60Hz, Top Bar), media card, screenshot tools, and iPhone wireless bridge card.
+- `bry.bar`: Customized status bar with indicators and widget layout.
+
+## Cloned / Third-Party Plugins
 The snapshot records configuration for these plugins without vendoring their
 Git repositories:
 

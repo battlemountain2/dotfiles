@@ -10,6 +10,9 @@
           "id": "omarchy.indicators"
         },
         {
+          "id": "omarchy.weather"
+        },
+        {
           "format": "dddd h:mm AP",
           "id": "tmn73.calendar",
           "showWorkingLocation": false,
@@ -17,9 +20,6 @@
         },
         {
           "id": "omarchy.system-update"
-        },
-        {
-          "id": "omarchy.weather"
         },
         {
           "id": "quickshell.spotify",
@@ -59,10 +59,13 @@
           "id": "io.github.haydenmckay.media-pip"
         },
         {
-          "id": "io.weirdware.blueferry"
+          "id": "omarchy.notifications"
         },
         {
           "id": "shavanced.notification-center"
+        },
+        {
+          "id": "io.weirdware.blueferry"
         },
         {
           "id": "omarchy.microphone"
@@ -71,19 +74,23 @@
           "id": "omarchy.audio"
         },
         {
-          "id": "bry.control-center"
-        },
-        {
           "id": "omarchy.power",
           "showPercentage": false
         },
         {
           "id": "omarchy.network"
+        },
+        {
+          "id": "io.github.thisisgm.discord"
+        },
+        {
+          "id": "bry.control-center"
         }
       ]
     },
     "position": "top",
-    "transparent": false
+    "transparent": true,
+    "id": "bry.bar"
   },
   "cloneSourceRestores": [
     "io.github.sirjul1337.lock-explorer",
@@ -110,9 +117,6 @@
       "id": "io.github.sirjul1337.lock-explorer"
     },
     {
-      "id": "iaeluk.omenu"
-    },
-    {
       "id": "omarchy.agents"
     },
     {
@@ -131,11 +135,19 @@
       "id": "omarchy.tray",
       "pinned": [],
       "hidden": [
-        "Antigravity_status_icon_1"
+        "Antigravity_status_icon_1",
+        "sonora",
+        "vesktop_status_icon_1"
       ]
     },
     {
       "id": "krall.switchboard"
+    },
+    {
+      "id": "iaeluk.omenu"
+    },
+    {
+      "id": "io.github.aswenia.omacord"
     }
   ],
   "version": 1

@@ -86,6 +86,12 @@ o.window({
   size = fileWindowSize,
 })
 
+o.window("^(org\\.kde\\.ark)$", {
+  float = true,
+  center = true,
+  size = fileWindowSize,
+})
+
 -- Portal file pickers (KDE and GTK backends)
 o.window("^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*|[Xx]dg-[Dd]esktop-[Pp]ortal.*)$", {
   float = true,
@@ -97,3 +103,58 @@ o.window("^(org\\.freedesktop\\.impl\\.portal\\.desktop\\..*|[Xx]dg-[Dd]esktop-[
 -- Picture share class "steam", so this catches both; games launched from Steam
 -- have their own classes and are unaffected.
 o.window("^(steam)$", { workspace = "5" })
+
+-- Omacalc: sleek floating calculator
+o.window({ class = "^(omacalc)$" }, {
+  float = true,
+  center = true,
+  size = { 360, 520 },
+})
+
+-- Quake-style dropdown scratchpad
+o.window({ class = "^(scratchpad-notes)$" }, {
+  workspace = "special:scratchpad",
+  float = true,
+  center = true,
+  size = { "72%", "62%" },
+})
+
+-- Phone Bridge: Messages (BlueFerry) and AirDrop (LocalSend)
+o.window({ class = "^(blueferry-tui)$" }, {
+  float = true,
+  center = true,
+  size = { "58%", "68%" },
+})
+
+o.window({ class = "^(localsend.*)$" }, {
+  float = true,
+  center = true,
+  size = { 460, 680 },
+})
+
+-- Gaming Emulators: float centered in 16:9 720p window
+o.window({ class = "^(retroarch)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^([pP][pP][sS][sS][pP][pP].*)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^(dolphin-emu)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+o.window({ class = "^(pcsx2.*)$" }, {
+  float = true,
+  center = true,
+  size = { 1280, 720 },
+})
+
+

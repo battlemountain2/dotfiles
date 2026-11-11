@@ -1,0 +1,21 @@
+{
+  "schemaVersion": 1,
+  "id": "bry.control-center",
+  "name": "Control Center",
+  "version": "0.1.0",
+  "author": "bry",
+  "description": "macOS-inspired Control Center: quick toggles, sliders, capture, privacy indicators, and MacBook health",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Control Center",
+    "description": "Unified system controls panel",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
