@@ -1,0 +1,17 @@
+id = "bry/twitch"
+name = "Twitch"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "streaming"]
+icon = "brand-twitch"
+description = "Quick Twitch streamer, channel, and game search"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "twitch.luau"
+prefix = "twitch"
+glyph = "brand-twitch"
+include_in_global_search = false

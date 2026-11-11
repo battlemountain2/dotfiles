@@ -1,0 +1,24 @@
+id = "bry/obsidian"
+name = "Obsidian Vault"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["productivity", "notes"]
+icon = "notes"
+description = "Quick search and capture for Obsidian vault and to-dos"
+
+[[launcher_provider]]
+id = "obsidian-search"
+entry = "obsidian.luau"
+prefix = "obs"
+glyph = "notebook"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "obsidian-todo"
+entry = "obsidian.luau"
+prefix = "todo"
+glyph = "checkbox"
+include_in_global_search = false

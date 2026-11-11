@@ -1,0 +1,24 @@
+id = "bry/audio"
+name = "Audio Controls"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["pulseaudio"]
+tags = ["audio", "utility"]
+icon = "headphones"
+description = "Fast audio switcher for FiiO K11 R2R, Speakers, EasyEffects, Mic, and Volume"
+
+[[launcher_provider]]
+id = "audio-short"
+entry = "audio.luau"
+prefix = "a"
+glyph = "headphones"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "audio-full"
+entry = "audio.luau"
+prefix = "audio"
+glyph = "headphones"
+include_in_global_search = false

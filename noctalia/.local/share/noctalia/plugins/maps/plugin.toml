@@ -1,0 +1,17 @@
+id = "bry/maps"
+name = "Google Maps"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "travel"]
+icon = "map-pin"
+description = "Quick location and places search in Google Maps"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "maps.luau"
+prefix = "maps"
+glyph = "map-pin"
+include_in_global_search = false

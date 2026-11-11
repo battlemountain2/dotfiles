@@ -1,0 +1,17 @@
+id = "bry/tv"
+name = "Smart TV Remote"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["media", "hardware", "remote"]
+icon = "device-tv"
+description = "Control Onn TV 4K Pro & LG TV: Power, Volume, Apps, and Stremio"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "tv.luau"
+prefix = "tv"
+glyph = "device-tv"
+include_in_global_search = false

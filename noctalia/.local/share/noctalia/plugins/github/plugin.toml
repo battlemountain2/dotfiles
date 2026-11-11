@@ -1,0 +1,17 @@
+id = "bry/github"
+name = "GitHub"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "development"]
+icon = "brand-github"
+description = "Quick GitHub repository search"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "github.luau"
+prefix = "gh"
+glyph = "brand-github"
+include_in_global_search = false

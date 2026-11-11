@@ -1,0 +1,17 @@
+id = "bry/pacman"
+name = "Arch Packages"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["pacman"]
+tags = ["system", "arch", "packages"]
+icon = "package"
+description = "Fast Arch Linux package search with direct browser lookup"
+
+[[launcher_provider]]
+id = "pacman"
+entry = "pacman.luau"
+prefix = "pac"
+glyph = "package"
+include_in_global_search = false

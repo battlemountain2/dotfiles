@@ -1,0 +1,17 @@
+id = "bry/stream"
+name = "OBS Stream Control"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["media", "streaming", "obs"]
+icon = "broadcast"
+description = "Switch OBS scenes, toggle mic mute, and enable stream privacy mode"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "stream.luau"
+prefix = "stream"
+glyph = "broadcast"
+include_in_global_search = false

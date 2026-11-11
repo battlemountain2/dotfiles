@@ -1,0 +1,17 @@
+id = "bry/gpu"
+name = "GPU & Hardware Monitor"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["system", "hardware", "nvidia"]
+icon = "cpu"
+description = "Real-time RTX 4070 Super temperature, VRAM usage, power, and fan stats"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "gpu.luau"
+prefix = "gpu"
+glyph = "cpu"
+include_in_global_search = false

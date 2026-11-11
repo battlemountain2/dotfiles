@@ -1,0 +1,17 @@
+id = "bry/share"
+name = "Discord Clip Compressor"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["media", "gaming", "sharing"]
+icon = "share"
+description = "Compress latest gameplay clip to <24MB for Discord and copy to clipboard"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "share.luau"
+prefix = "share"
+glyph = "share"
+include_in_global_search = false

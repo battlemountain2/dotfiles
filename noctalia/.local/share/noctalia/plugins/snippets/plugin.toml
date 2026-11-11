@@ -1,0 +1,17 @@
+id = "bry/snippets"
+name = "Snippets"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["productivity", "utility"]
+icon = "clipboard-text"
+description = "Quick text snippet and template launcher provider"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "snippets.luau"
+prefix = "snip"
+glyph = "clipboard-text"
+include_in_global_search = false

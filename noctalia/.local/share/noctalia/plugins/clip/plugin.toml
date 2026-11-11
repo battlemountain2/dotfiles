@@ -1,0 +1,17 @@
+id = "bry/clip"
+name = "Clip & Replay Hub"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["media", "gaming", "utility"]
+icon = "video"
+description = "Browse, play, and save gameplay clips"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "clip.luau"
+prefix = "clip"
+glyph = "video"
+include_in_global_search = false

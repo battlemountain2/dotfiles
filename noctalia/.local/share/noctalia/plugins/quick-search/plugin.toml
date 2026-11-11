@@ -1,0 +1,38 @@
+id = "bry/quick-search"
+name = "Quick Search"
+version = "1.1.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility"]
+icon = "search"
+description = "Quick web search providers for GitHub, YouTube, Wikipedia, and Twitch"
+
+[[launcher_provider]]
+id = "github"
+entry = "github.luau"
+prefix = "gh"
+glyph = "brand-github"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "youtube"
+entry = "youtube.luau"
+prefix = "yt"
+glyph = "brand-youtube"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "wikipedia"
+entry = "wiki.luau"
+prefix = "wiki"
+glyph = "book"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "twitch"
+entry = "twitch.luau"
+prefix = "twitch"
+glyph = "brand-twitch"
+include_in_global_search = false

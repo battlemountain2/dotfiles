@@ -1,0 +1,17 @@
+id = "bry/youtube"
+name = "YouTube"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "media"]
+icon = "brand-youtube"
+description = "Quick YouTube video search"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "youtube.luau"
+prefix = "yt"
+glyph = "brand-youtube"
+include_in_global_search = false

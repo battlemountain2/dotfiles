@@ -1,0 +1,17 @@
+id = "bry/wiki"
+name = "Wikipedia"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "knowledge"]
+icon = "book"
+description = "Quick Wikipedia article search launcher provider"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "wiki.luau"
+prefix = "wiki"
+glyph = "book"
+include_in_global_search = false

@@ -1,0 +1,17 @@
+id = "bry/clean"
+name = "Storage & System Cleaner"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["system", "maintenance", "storage"]
+icon = "trash"
+description = "Clean old gameplay clips, pacman cache, and system trash"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "clean.luau"
+prefix = "clean"
+glyph = "trash"
+include_in_global_search = false

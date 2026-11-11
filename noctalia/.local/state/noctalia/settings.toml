@@ -1,0 +1,566 @@
+config_version = 16
+
+[accessibility]
+ui_scale = 1.1000000089406967
+
+[bar.default]
+capsule_radius = 8
+center = [ "group:g_center", "group:g1" ]
+font_family = "Geist"
+layer = "top"
+margin_edge = 2
+padding = 8
+start = [ "workspaces", "media", "group:g2" ]
+
+    [bar.default.monitor.DP-2]
+    match = "DP-2"
+    position = "top"
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    border_width = 1.0
+    enabled = true
+    fill = "on_secondary"
+    id = "g_center"
+    members = [ "weather" ]
+    opacity = 0.69999998807907104
+    padding = 6.0
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    border_width = 1.0
+    enabled = true
+    fill = "on_secondary"
+    id = "g_right"
+    members = [
+        "bar_2",
+        "color_picker",
+        "recorder",
+        "shelly",
+        "clipboard",
+        "bar",
+        "airpods",
+        "notifications",
+        "network",
+        "volume",
+        "brightness"
+    ]
+    opacity = 0.69999998807907104
+    padding = 4.0
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    border_width = 1.0
+    enabled = true
+    fill = "on_secondary"
+    id = "g1"
+    members = [ "wallhaven", "current", "clock", "w_engine" ]
+    opacity = 0.69999998807907104
+    padding = 6.0
+
+    [[bar.default.capsule_group]]
+    accordion = false
+    accordion_direction = "end"
+    border_width = 1.0
+    enabled = true
+    fill = "surface_container"
+    id = "g2"
+    members = [ "cpu", "ram", "sysmon" ]
+    opacity = 0.69999998807907104
+    padding = 6.0
+
+[brightness]
+enable_ddcutil = true
+
+[calendar]
+enabled = true
+
+[[control_center.shortcuts]]
+type = "wifi"
+
+[[control_center.shortcuts]]
+type = "bluetooth"
+
+[[control_center.shortcuts]]
+type = "nightlight"
+
+[[control_center.shortcuts]]
+type = "notification"
+
+[[control_center.shortcuts]]
+type = "power_profile"
+
+[[control_center.shortcuts]]
+type = "clipboard"
+
+[dock]
+active_monitor_only = true
+enabled = true
+icon_size = 45
+launcher_icon = "rocket"
+launcher_position = "start"
+main_axis_padding = 10
+pinned = [
+    "org.kde.dolphin",
+    "io.github.battlemountain2.Hermes",
+    "steam",
+    "chatgpt",
+    "com.mitchellh.ghostty",
+    "sh.cider.cider",
+    "vesktop",
+    "helium"
+]
+reserve_space = false
+show_dots = true
+smart_auto_hide = true
+
+[hot_corners]
+enabled = false
+
+[location]
+auto_locate = true
+
+[lockscreen_widgets]
+enabled = true
+schema_version = 2
+widget_order = [
+    "lockscreen-login-box@HEADLESS-1",
+    "lockscreen-login-box@DP-2",
+    "lockscreen-login-box@FALLBACK",
+    "lockscreen-login-box@WAYLAND-1",
+    "lockscreen-login-box@DP-1",
+    "lockscreen-widget-0000000000000001",
+    "lockscreen-widget-0000000000000002"
+]
+
+    [lockscreen_widgets.grid]
+    cell_size = 16
+    major_interval = 4
+    visible = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 1280.0
+    cy = 1258.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-1".settings]
+        background_color = "surface_container"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@DP-2"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 720.0
+    cy = 2236.444580078125
+    output = "DP-2"
+    placement_height = 2560.0
+    placement_width = 1440.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@DP-2".settings]
+        background_color = "surface_container"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@FALLBACK"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 960.0
+    cy = 898.0
+    output = "FALLBACK"
+    placement_height = 1080.0
+    placement_width = 1920.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@FALLBACK".settings]
+        background_color = "surface_container"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@HEADLESS-1"]
+    box_height = 196.0
+    box_width = 810.0
+    cx = 480.0
+    cy = 358.0
+    output = "HEADLESS-1"
+    placement_height = 540.0
+    placement_width = 960.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@HEADLESS-1".settings]
+        background_color = "surface_container"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget."lockscreen-login-box@WAYLAND-1"]
+    box_height = 196.0
+    box_width = 720.0
+    cx = 320.0
+    cy = 178.0
+    output = "WAYLAND-1"
+    placement_height = 360.0
+    placement_width = 640.0
+    rotation = 0.0
+    type = "login_box"
+
+        [lockscreen_widgets.widget."lockscreen-login-box@WAYLAND-1".settings]
+        background_color = "surface_container"
+        background_opacity = 0.88
+        background_radius = 12.0
+        center_password_text = false
+        input_opacity = 1.0
+        input_radius = 6.0
+        layout = "regular"
+        show_caps_lock = true
+        show_keyboard_layout = true
+        show_login_button = true
+        show_media = true
+        show_session_buttons = true
+        show_unlock_hint = true
+        show_weather = true
+
+    [lockscreen_widgets.widget.lockscreen-widget-0000000000000001]
+    box_height = 0.0
+    box_width = 0.0
+    cx = 1076.050048828125
+    cy = 1010.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "media_player"
+
+    [lockscreen_widgets.widget.lockscreen-widget-0000000000000002]
+    box_height = 160.0
+    box_width = 384.0
+    cx = 1488.0
+    cy = 1009.0
+    output = "DP-1"
+    placement_height = 1440.0
+    placement_width = 2560.0
+    rotation = 0.0
+    type = "weather"
+
+[notification]
+monitors = [ "DP-2" ]
+position = "bottom_right"
+
+[osd]
+background_opacity = 0.69999998435378075
+monitors = [ "DP-1" ]
+position = "bottom_right"
+position_vertical = "bottom_right"
+
+    [osd.kinds]
+    lock_keys = false
+
+[plugin_settings."noctalia/notes"]
+notes_dir = "/home/bry/notes"
+
+[plugin_settings."noctalia/screen_recorder"]
+audio_source = "both"
+replay_duration = 60
+replay_enabled = true
+
+[plugins]
+auto_update = "official"
+enabled = [
+    "liamwh/emoji-picker",
+    "noctalia/bitwarden",
+    "thaer99ob/default-apps",
+    "oldirtty/color_picker",
+    "noctalia/screen_recorder",
+    "raycursive/discord-voice",
+    "noctalia/translator",
+    "joshuaslate/shelly",
+    "tadomika_ari/w-engine",
+    "cleboost/zed-provider",
+    "yuuto/calculator",
+    "noctalia/notes",
+    "bry/remind",
+    "bry/snippets",
+    "bry/quick-search",
+    "bry/kill",
+    "bry/maps",
+    "bry/reddit",
+    "bry/audio",
+    "bry/media",
+    "bry/recent",
+    "bry/pacman",
+    "noctalia/wallhaven",
+    "bry/clip",
+    "bry/share",
+    "bry/stream",
+    "bry/tv",
+    "bry/clean",
+    "bry/gpu",
+    "noctalia/umbriel-companion"
+]
+
+[shell]
+avatar_path = "/home/bry/Pictures/arcteryx dog.JPG"
+font_family = "Noto Sans"
+polkit_agent = true
+screen_time_enabled = true
+settings_window_translucent = true
+umbriel_overview_close_on_launch_enabled = true
+umbriel_overview_type_to_launch_enabled = true
+
+    [shell.greeter_sync]
+    auto_sync = true
+
+    [shell.launcher]
+    app_grid = true
+    category_icons_only = true
+    pinned = [ "kitty", "vesktop", "sh.cider.cider", "Deadlock", "org.kde.dolphin", "localsend", "surfshark", "helium" ]
+    show_app_actions = true
+    width = 680
+
+        [shell.launcher.providers.emoji]
+        global = true
+
+        [shell.launcher.providers.panels]
+        global = true
+
+        [shell.launcher.providers.session]
+        global = true
+
+        [shell.launcher.providers.wallpaper]
+        global = true
+
+        [shell.launcher.providers.windows]
+        global = true
+
+    [shell.panel]
+    clipboard_placement = "floating"
+    clipboard_position = "center"
+    control_center_placement = "floating"
+    control_center_position = "center"
+    launcher_placement = "floating"
+    launcher_position = "center"
+    open_near_click_clipboard = false
+    open_near_click_launcher = false
+    open_near_click_session = false
+    open_near_click_wallpaper = false
+    session_placement = "floating"
+    session_position = "center"
+    transparency_mode = "solid"
+    wallpaper_placement = "floating"
+    wallpaper_position = "center"
+
+    [shell.screen_corners]
+    enabled = true
+
+    [shell.screenshot]
+    annotate = true
+    confirm_region = true
+    copy_on_close = true
+    directory = "/home/bry/Pictures/Screenshots"
+    pipe_to_command = false
+    skip_annotate_on_copy_save = true
+
+[theme]
+builtin = "Ayu"
+community_palette = "ADW"
+mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "m3-tonal-spot"
+
+    [theme.templates]
+    builtin_ids = [ "alacritty", "btop", "cava", "gtk3", "gtk4", "ghostty", "hyprland", "kcolorscheme", "kitty", "qt", "umbriel" ]
+    community_ids = [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "feishin",
+        "ungoogled-chromium",
+        "discord",
+        "libreoffice",
+        "micro",
+        "obsidian",
+        "zed",
+        "heroiclauncher",
+        "prismlauncher",
+        "steam",
+        "fastfetch",
+        "obs",
+        "hyprtoolkit",
+        "papirus-icons",
+        "bat",
+        "yazi"
+    ]
+
+[wallpaper]
+directory = "/home/bry/Pictures/Wallpapers"
+
+    [wallpaper.default]
+    path = "/home/bry/Pictures/Wallpapers/Nokse Mojo - Deadlock (21d9q9).png"
+
+    [wallpaper.last]
+    path = "/home/bry/Pictures/Wallpapers/Nokse Mojo - Deadlock (21d9q9).png"
+
+    [wallpaper.monitors.DP-1]
+    path = "/home/bry/Pictures/Wallpapers/Nokse Mojo - Deadlock (21d9q9).png"
+
+    [wallpaper.monitors.DP-2]
+    path = "/home/bry/Pictures/Wallpapers/Nokse Mojo - Deadlock (21d9q9).png"
+
+    [[wallpaper.favorite]]
+    palette_source = "wallpaper"
+    path = "/home/bry/Pictures/Wallpapers/jr beauty sleep5.png"
+    theme_mode = "dark"
+    wallpaper_scheme = "m3-content"
+
+    [[wallpaper.favorite]]
+    palette_source = "wallpaper"
+    path = "/home/bry/Pictures/Wallpapers/nord-princess-zelda.jpg"
+    theme_mode = "dark"
+    wallpaper_scheme = "m3-tonal-spot"
+
+    [[wallpaper.favorite]]
+    path = "/home/bry/Pictures/Wallpapers/cabin.png"
+
+    [[wallpaper.favorite]]
+    path = "/home/bry/Pictures/Wallpapers/bunnies-road.png"
+
+    [[wallpaper.favorite]]
+    palette_source = "wallpaper"
+    path = "/home/bry/Pictures/Wallpapers/Nokse Mojo - Deadlock (21d9q9).png"
+    theme_mode = "dark"
+    wallpaper_scheme = "m3-tonal-spot"
+
+[weather]
+unit = "imperial"
+
+[widget.airpods]
+type = "harveywuk/airpods:airpods"
+
+[widget.bar]
+hide_when_disconnected = true
+type = "raycursive/discord-voice:bar"
+
+[widget.bar_2]
+type = "noctalia/umbriel-companion:bar"
+
+[widget.brightness.actions]
+right = "nightlight-force-toggle"
+
+[widget.clipboard.actions]
+right = "screenshot-region"
+
+[widget.clock.actions]
+right = "notification-dnd-toggle"
+
+[widget.color_picker]
+type = "oldirtty/color_picker:widget"
+
+[widget.cpu]
+stat = "cpu_temp"
+
+[widget.current]
+type = "thaer99ob/default-apps:current"
+
+[widget.media.actions]
+scroll_down = "volume-down"
+scroll_up = "volume-up"
+
+[widget.network]
+show_label = false
+show_vpn_label = true
+
+[widget.notifications]
+hide_when_no_unread = true
+
+[widget.privacy]
+hide_inactive = true
+
+    [widget.privacy.actions]
+    right = "mic-mute"
+
+[widget.recorder]
+type = "noctalia/screen_recorder:recorder"
+
+[widget.shelly]
+click_action = "open_updater"
+hide_when_up_to_date = true
+type = "joshuaslate/shelly:shelly"
+
+[widget.sysmon]
+stat = "gpu_usage"
+
+[widget.tray]
+detached_panel = true
+drawer = true
+pinned = [ "Surfshark", "Vesktop", "Cider", "obs", "virt-manager", "AR3LzhsVK1", "x8ZvA9D4Pm", "gpu-screen-recorder-ui" ]
+
+[widget.w_engine]
+enabled = false
+type = "tadomika_ari/w-engine:w-engine-widget"
+
+[widget.wallhaven]
+type = "noctalia/wallhaven:wallhaven"
+
+[widget.weather.actions]
+right = "nightlight-force-toggle"
+
+[widget.workspaces]
+labels_only_when_occupied = false
+pill_scale = 0.60000000000000009
+style = "regular"

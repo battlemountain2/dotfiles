@@ -1,0 +1,17 @@
+id = "bry/reddit"
+name = "Reddit"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = ["xdg-utils"]
+tags = ["utility", "social"]
+icon = "brand-reddit"
+description = "Smart Reddit and subreddit launcher provider"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "reddit.luau"
+prefix = "r"
+glyph = "brand-reddit"
+include_in_global_search = false

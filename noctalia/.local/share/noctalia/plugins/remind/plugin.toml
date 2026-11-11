@@ -1,0 +1,17 @@
+id = "bry/remind"
+name = "Remind"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["productivity", "utility"]
+icon = "alarm"
+description = "Quick reminders launcher provider"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "remind.luau"
+prefix = "remind"
+glyph = "alarm"
+include_in_global_search = false

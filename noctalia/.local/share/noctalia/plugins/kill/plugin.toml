@@ -1,0 +1,17 @@
+id = "bry/kill"
+name = "Process Killer"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["system", "utility"]
+icon = "skull"
+description = "Quick process killer launcher provider"
+
+[[launcher_provider]]
+id = "launcher"
+entry = "kill.luau"
+prefix = "kill"
+glyph = "skull"
+include_in_global_search = false

@@ -1,0 +1,117 @@
+[
+  {
+    "title": "!specs (Twitch / Discord)",
+    "description": "PC & Display Specifications",
+    "content": "AMD Ryzen 5 7600X | NVIDIA GeForce RTX 4070 SUPER | 32GB DDR5 | AOC Q27G41ZDF 240Hz OLED + LG 200Hz | Arch Linux (CachyOS)"
+  },
+  {
+    "title": "!audio (Twitch / Discord)",
+    "description": "DAC, Headphones & Mic Gear",
+    "content": "FiiO K11 R2R DAC (NOS Mode) | Audio-Technica ATH-R50x (oratory1990 Harman EQ + Crossfeed) | Blue Yeti X | PipeWire 5.3ms"
+  },
+  {
+    "title": "Audio: Toggle Headphones / Speakers",
+    "description": "Switch between FiiO K11 R2R and Redragon Speakers",
+    "content": "/home/bry/.local/bin/toggle-audio-sink"
+  },
+  {
+    "title": "Audio: Set Default -> FiiO K11 R2R",
+    "description": "Directly activate FiiO K11 DAC (Headphones)",
+    "content": "pactl set-default-sink alsa_output.usb-FIIO_FiiO_K11_R2R-01.playback.0.0"
+  },
+  {
+    "title": "Audio: Set Default -> Redragon Speakers",
+    "description": "Directly activate Ryzen HD Audio (Realtek ALC897)",
+    "content": "pactl set-default-sink alsa_output.pci-0000_10_00.6.analog-stereo"
+  },
+  {
+    "title": "Audio: Mute / Unmute Yeti Mic",
+    "description": "Toggle Blue Yeti X input mute in PipeWire",
+    "content": "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"
+  },
+  {
+    "title": "Audio: Mute / Unmute Output",
+    "description": "Toggle master output mute in PipeWire",
+    "content": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+  },
+  {
+    "title": "Kill: Force Close Game (CS2 / Deadlock / Rivals)",
+    "description": "Emergency killall -9 for frozen gaming processes",
+    "content": "killall -9 cs2 deadlock.exe marvel-rivals.exe bb-probe 2>/dev/null"
+  },
+  {
+    "title": "Hyprland: Reload Compositor Config",
+    "description": "Instant live reload of Hyprland configuration",
+    "content": "hyprctl reload"
+  },
+  {
+    "title": "Gaming: Clear NVIDIA Shader Cache",
+    "description": "Wipe stale Vulkan/GL shader cache if games stutter",
+    "content": "rm -rf ~/.nv/GLCache ~/.cache/nvidia/GLCache"
+  },
+  {
+    "title": "Audio: Restart PipeWire Subsystem",
+    "description": "Restart PipeWire & WirePlumber without rebooting",
+    "content": "systemctl --user restart pipewire pipewire-pulse wireplumber"
+  },
+  {
+    "title": "Twitch",
+    "description": "battlemountain2",
+    "content": "twitch.tv/battlemountain2"
+  },
+  {
+    "title": "Discord: Tag",
+    "description": "crushtheflowers",
+    "content": "@crushtheflowers"
+  },
+  {
+    "title": "Github",
+    "description": "battlemountain2",
+    "content": "https://github.com/battlemountain2"
+  },
+  {
+    "title": "Navidrome Local URL",
+    "description": "Local media server web address",
+    "content": "http://localhost:4533"
+  },
+  {
+    "title": "Check Public IP",
+    "description": "Fast curl command to get external IP",
+    "content": "curl -s ifconfig.me"
+  },
+  {
+    "title": "Git: Undo Last Commit (Keep Changes)",
+    "description": "Soft reset HEAD~1",
+    "content": "git reset --soft HEAD~1"
+  },
+  {
+    "title": "Git: Pretty Log Graph",
+    "description": "Compact one-line commit tree",
+    "content": "git log --graph --oneline --decorate -n 15"
+  },
+  {
+    "title": "Tar: Extract .tar.gz",
+    "description": "Standard archive extraction",
+    "content": "tar -xvzf "
+  },
+  {
+    "title": "FFmpeg: Extract Audio to MP3",
+    "description": "Extract audio without re-encoding",
+    "content": "ffmpeg -i input.mp4 -vn -c:a copy output.m4a"
+  },
+  {
+    "title": "Kaomoji: Shrug",
+    "description": "¯\\_(ツ)_/¯",
+    "content": "¯\\_(ツ)_/¯"
+  },
+  {
+    "title": "Kaomoji: Table Flip",
+    "description": "(╯°□°)╯︵ ┻━┻",
+    "content": "(╯°□°)╯︵ ┻━┻"
+  },
+  {
+    "title": "Kaomoji: Lenny Face",
+    "description": "( ͡° ͜ʖ ͡°)",
+    "content": "( ͡° ͜ʖ ͡°)"
+  }
+]

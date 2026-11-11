@@ -1,0 +1,31 @@
+id = "bry/recent"
+name = "Recent Files"
+version = "1.0.0"
+plugin_api = 26
+author = "bry"
+license = "MIT"
+dependencies = []
+tags = ["utility", "files"]
+icon = "files"
+description = "Quick access to recent screenshots and downloads"
+
+[[launcher_provider]]
+id = "screenshots"
+entry = "recent_shots.luau"
+prefix = "shot"
+glyph = "photo"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "downloads"
+entry = "recent_dl.luau"
+prefix = "dl"
+glyph = "download"
+include_in_global_search = false
+
+[[launcher_provider]]
+id = "clips"
+entry = "recent_clips.luau"
+prefix = "clips"
+glyph = "video"
+include_in_global_search = false
