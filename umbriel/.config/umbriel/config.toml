@@ -1,0 +1,307 @@
+# Umbriel configuration for matcha
+
+[include.optional]
+files = ["noctalia.toml"]
+
+[general]
+autostart = ["/home/bry/.config/umbriel/autostart.sh"]
+xwayland_primary_output = "DP-1"
+show_cheatsheet = false
+
+[environment]
+QT_QPA_PLATFORMTHEME = "kde"
+QT_QPA_PLATFORM = "wayland;xcb"
+ELECTRON_OZONE_PLATFORM_HINT = "auto"
+XCURSOR_THEME = "breeze_cursors"
+XCURSOR_SIZE = "24"
+GTK_USE_PORTAL = "1"
+
+[input]
+middle_click_paste = false
+
+[input.mouse]
+accel_profile = "flat"
+
+[input.focus]
+follows_mouse = true
+follows_mouse_max_scroll = 0.0
+hover_raises = false
+
+[input.cursor]
+theme = "breeze_cursors"
+size = 24
+
+[output.DP-1]
+mode = "2560x1440@240"
+position = [0, 0]
+focus_at_startup = true
+workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+vrr = "fullscreen"
+hdr = "off"
+tearing = true
+
+[output.DP-2]
+mode = "2560x1440@200.013"
+position = [2560, -1120]
+transform = "270"
+workspaces = ["10", "11", "12", "13", "14", "15", "16", "17", "18"]
+workspace_axis = "horizontal"
+layout.scrolling.default_extent_fraction = 0.43
+
+[layout]
+mode = "dwindle"
+gap = 8
+dwindle.preserve_split = true
+
+[layout.scrolling]
+center_focused = "never"
+default_extent_fraction = 0.43
+
+[appearance]
+border_width = 2
+corner_radius = 12
+
+[appearance.blur]
+enabled = true
+radius = 6
+passes = 4
+noise = 0.02
+contrast = 1.05
+brightness = 1.0
+saturation = 1.2
+
+[keybinds]
+# Launcher & Noctalia Shell
+"Mod+Tab" = "overview-toggle"
+"Mod+Space" = "spawn noctalia msg panel-toggle launcher"
+"Alt+Tab" = "spawn noctalia msg window-switcher"
+"Mod+X" = "spawn noctalia msg panel-toggle control-center"
+"Mod+Z" = "spawn noctalia msg settings-toggle"
+"Mod+V" = "spawn noctalia msg panel-toggle clipboard"
+"Mod+L" = "spawn noctalia msg session lock"
+"Mod+Alt+C" = "spawn noctalia msg panel-toggle session"
+"Mod+A" = "spawn noctalia msg panel-toggle control-center audio"
+"Mod+M" = "spawn noctalia msg panel-toggle control-center media"
+"Mod+P" = "spawn noctalia msg panel-toggle oldirtty/color_picker:panel"
+"Mod+Alt+P" = "spawn hyprpicker -a"
+"Mod+period" = "spawn noctalia msg panel-toggle liamwh/emoji-picker:desktop"
+"Mod+Alt+W" = "spawn noctalia msg panel-toggle wallpaper"
+"Mod+Alt+A" = "spawn /home/bry/.local/bin/toggle-audio-sink"
+"Mod+Alt+K" = "spawn /home/bry/.local/bin/autoclick-toggle"
+"Mod+Alt+R" = "spawn /home/bry/.local/bin/noctalia-bar-recover"
+
+# Applications
+"Mod+T" = "spawn ghostty"
+"Mod+Return" = "spawn zeditor"
+"Mod+E" = "spawn env QT_QPA_PLATFORMTHEME=kde dolphin"
+"Mod+B" = "spawn helium-browser"
+"Mod+C" = "spawn /home/bry/.local/bin/cursor-calculator"
+"Ctrl+Shift+Escape" = "spawn ghostty -e btop"
+"Ctrl+Alt+T" = "spawn fish -c 'tv on'"
+"Mod+F10" = "spawn /home/bry/.config/hypr/scripts/stream_mode.sh"
+
+# Window actions
+"Mod+Q" = "window-close"
+"Mod+Shift+Q" = "window-kill"
+"Mod+F" = "window-toggle-floating"
+"Mod+Alt+Space" = "window-toggle-floating"
+"Mod+W" = "window-toggle-maximize-to-edges"
+"Mod+Shift+W" = "window-toggle-fullscreen"
+"Mod+J" = "layout-toggle-split"
+"Mod+Shift+P" = "window-toggle-pinned"
+"Mod+Escape" = "session-quit"
+
+
+# Scratchpad
+"Mod+S" = "scratchpad-toggle"
+"Mod+Alt+S" = "window-move-to-scratchpad"
+"Mod+Shift+S" = "window-restore-from-scratchpad"
+
+# Focus & Movement
+"Mod+Left" = "window-focus-left"
+"Mod+Shift+Left" = "window-move-left"
+"Mod+Right" = "window-focus-right"
+"Mod+Shift+Right" = "window-move-right"
+"Mod+Up" = "window-focus-up"
+"Mod+Shift+Up" = "window-move-up"
+"Mod+Down" = "window-focus-down"
+"Mod+Shift+Down" = "window-move-down"
+
+# Monitor focus
+"Mod+Alt+Left" = "output-focus-left"
+"Mod+Alt+Right" = "output-focus-right"
+"Mod+Alt+1" = "output-focus-left"
+"Mod+Alt+2" = "output-focus-right"
+
+# Workspace switching & scrolling
+"Mod+Ctrl+Left" = "workspace-previous"
+"Mod+Ctrl+Right" = "workspace-next"
+"Mod+WheelDown" = "spawn /home/bry/.local/bin/umbriel-smart-scroll down"
+"Mod+WheelUp" = "spawn /home/bry/.local/bin/umbriel-smart-scroll up"
+"Mod+Ctrl+WheelDown" = "layout-scroll-down"
+"Mod+Ctrl+WheelUp" = "layout-scroll-up"
+"Mod+Ctrl+XF86AudioRaiseVolume" = "workspace-next"
+"Mod+Ctrl+XF86AudioLowerVolume" = "workspace-previous"
+"Mod+0" = "workspace-switch 10 --output DP-2"
+"Mod+Shift+0" = "window-move-to-workspace 10 --output DP-2"
+"Mod+G" = "workspace-switch 9 --output DP-1"
+
+"Mod+1" = "workspace-switch 1 --output DP-1"
+"Mod+Shift+1" = "window-move-to-workspace 1 --output DP-1"
+"Mod+Ctrl+Shift+1" = "window-move-to-workspace-silent 1 --output DP-1"
+"Mod+2" = "workspace-switch 2 --output DP-1"
+"Mod+Shift+2" = "window-move-to-workspace 2 --output DP-1"
+"Mod+Ctrl+Shift+2" = "window-move-to-workspace-silent 2 --output DP-1"
+"Mod+3" = "workspace-switch 3 --output DP-1"
+"Mod+Shift+3" = "window-move-to-workspace 3 --output DP-1"
+"Mod+Ctrl+Shift+3" = "window-move-to-workspace-silent 3 --output DP-1"
+"Mod+4" = "workspace-switch 4 --output DP-1"
+"Mod+Shift+4" = "window-move-to-workspace 4 --output DP-1"
+"Mod+Ctrl+Shift+4" = "window-move-to-workspace-silent 4 --output DP-1"
+"Mod+5" = "workspace-switch 5 --output DP-1"
+"Mod+Shift+5" = "window-move-to-workspace 5 --output DP-1"
+"Mod+Ctrl+Shift+5" = "window-move-to-workspace-silent 5 --output DP-1"
+"Mod+6" = "workspace-switch 6 --output DP-1"
+"Mod+Shift+6" = "window-move-to-workspace 6 --output DP-1"
+"Mod+Ctrl+Shift+6" = "window-move-to-workspace-silent 6 --output DP-1"
+"Mod+7" = "workspace-switch 7 --output DP-1"
+"Mod+Shift+7" = "window-move-to-workspace 7 --output DP-1"
+"Mod+Ctrl+Shift+7" = "window-move-to-workspace-silent 7 --output DP-1"
+"Mod+8" = "workspace-switch 8 --output DP-1"
+"Mod+Shift+8" = "window-move-to-workspace 8 --output DP-1"
+"Mod+Ctrl+Shift+8" = "window-move-to-workspace-silent 8 --output DP-1"
+"Mod+9" = "workspace-switch 9 --output DP-1"
+"Mod+Shift+9" = "window-move-to-workspace 9 --output DP-1"
+"Mod+Ctrl+Shift+9" = "window-move-to-workspace-silent 9 --output DP-1"
+
+# Hardware controls & Screenshots
+"Print" = "spawn noctalia msg screenshot-region"
+"Mod+Print" = "spawn noctalia msg screenshot-fullscreen"
+"XF86AudioRaiseVolume" = "spawn noctalia msg volume-up"
+"XF86AudioLowerVolume" = "spawn noctalia msg volume-down"
+"XF86AudioMute" = "spawn noctalia msg volume-mute"
+"XF86AudioPlay" = "spawn noctalia msg media toggle"
+"XF86AudioPause" = "spawn noctalia msg media toggle"
+"XF86AudioNext" = "spawn noctalia msg media next"
+"XF86AudioPrev" = "spawn noctalia msg media previous"
+"XF86MonBrightnessUp" = "spawn noctalia msg brightness-up"
+"XF86MonBrightnessDown" = "spawn noctalia msg brightness-down"
+"Alt+Z" = "spawn gsr-ui launch-show"
+"Alt+C" = "spawn gsr-ui-cli replay-save"
+"Alt+R" = "spawn gsr-ui-cli toggle-record"
+
+[[workspace]]
+output = "DP-2"
+name = "10"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "11"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "12"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "13"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "14"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "15"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "16"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "17"
+layout.mode = "scrolling"
+
+[[workspace]]
+output = "DP-2"
+name = "18"
+layout.mode = "scrolling"
+
+# Window Rules
+[[window_rule]]
+match.app_id = "^(ghostty|com[.]mitchellh[.]ghostty|kitty|dev[.]noctalia[.]Noctalia|.*[Cc]alc.*|org[.]pulseaudio[.]pavucontrol|blueman-manager|kvantummanager|qt5ct|qt6ct|nwg-look|.*satty.*)$"
+default_floating = true
+
+[[window_rule]]
+match.app_id = "^dev[.]noctalia[.]UmbrielSharePicker$"
+default_floating = true
+default_floating_size_px = { width = 800, height = 600 }
+
+[[window_rule]]
+match.app_id = "^org[.]kde[.]dolphin$"
+default_floating = true
+default_floating_size = { width = 0.50, height = 0.55 }
+
+[[window_rule]]
+match.title = "^[Pp]icture[- ]?[Ii]n[- ]?[Pp]icture"
+default_floating = true
+default_pinned = true
+default_floating_size = { width = 0.25, height = 0.25 }
+
+[[window_rule]]
+match.is_alone = true
+match.is_floating = false
+border_width = 0
+
+[[window_rule]]
+match.content_type = "game"
+default_output = "DP-1"
+default_workspace = "9"
+
+[[window_rule]]
+match.app_id = "^(steam_app_[0-9]+|gamescope|cs2|deadlock|dota2|Bloodborne|bb-probe)$"
+default_output = "DP-1"
+default_workspace = "9"
+
+[[window_rule]]
+match.app_id = "^(cs2|deadlock|dota2|steam_app_730|steam_app_1422450|steam_app_2767030|steam_app_2356550|steam_app_105600)$"
+tearing = true
+
+[[window_rule]]
+match.app_id = "^([Ff][Ll]64|[Ee]xplorer)[.][Ee][Xx][Ee]$"
+default_output = "DP-1"
+default_workspace = "8"
+default_floating = true
+default_focused = false
+
+[[window_rule]]
+blur = true
+
+[[window_rule]]
+match.app_id = "^([Zz]en.*|zen.*)$"
+blur = true
+blur_popups = true
+background_render = true
+
+[[window_rule]]
+match.app_id = "^io[.]github[.]battlemountain2[.]Iris$"
+opacity = 0.98
+blur = true
+
+[[layer_rule]]
+match.namespace = '^noctalia-(bar-[^"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^"]*)$'
+blur = true
+blur_ignore_alpha = 0.5
+blur_popups = true
+
+[[layer_rule]]
+match.namespace = "^noctalia-(notification|dock|panel|attached-panel|osd)$"
+blur_optimized = false
