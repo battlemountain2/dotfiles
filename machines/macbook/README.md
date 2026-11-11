@@ -1,5 +1,7 @@
 # MacBook Profile (`aarch64` / Aurora Linux — Umbriel + Noctalia)
 
+> **🤖 Next Agent / Deployment Runbook:** Start by reading **[`AGENT_HANDOFF.md`](AGENT_HANDOFF.md)** before modifying any files or installing packages on the MacBook. It covers Aurora Linux detection (`ostree`/`dnf` vs `pacman`/AUR), backups, 3-finger overview setup, and what to cherry-pick vs skip.
+
 This directory contains reference configuration for the Apple Silicon MacBook (`aarch64`, 14" Retina), updated for **Aurora Linux** with **Umbriel** and **Noctalia 5.4+**, alongside the earlier Omarchy/Hyprland reference files.
 
 This directory mirrors paths beneath `$HOME`, and intentionally stays separate from the desktop Stow packages under `~/dotfiles/` because monitor layout, HiDPI scaling (`2x`), touchpad gestures, keyboard backlight, lid events, and NVIDIA/gaming rules differ between the two machines.
