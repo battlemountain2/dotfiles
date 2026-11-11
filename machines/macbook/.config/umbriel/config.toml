@@ -1,0 +1,230 @@
+# Umbriel configuration for MacBook (Apple Silicon / Aurora Linux)
+# Reference profile under machines/macbook — review display/app names before deploying.
+
+[include.optional]
+files = ["noctalia.toml"]
+
+[general]
+autostart = ["/home/bry/.config/umbriel/autostart.sh"]
+xwayland_native_resolution = true
+show_cheatsheet = false
+
+[environment]
+QT_QPA_PLATFORMTHEME = "kde"
+QT_QPA_PLATFORM = "wayland;xcb"
+ELECTRON_OZONE_PLATFORM_HINT = "auto"
+XCURSOR_THEME = "breeze_cursors"
+XCURSOR_SIZE = "24"
+GTK_USE_PORTAL = "1"
+GDK_SCALE = "2"
+
+[events]
+# Re-sync PipeWire/WirePlumber after lid open to prevent USB/ASAHI audio stalls on wake
+lid_open = "systemctl --user restart wireplumber"
+# Optional clamshell mode when an external display is attached:
+# lid_close = "umbriel msg output-disable eDP-1"
+
+[input]
+middle_click_paste = false
+
+[input.mouse]
+accel_profile = "flat"
+
+[input.touchpad]
+enabled = true
+natural_scroll = true
+click_method = "clickfinger"
+tap = true
+tap_and_drag = true
+disable_while_typing = true
+scroll_factor = 0.4
+
+[input.focus]
+follows_mouse = true
+follows_mouse_max_scroll = 0.0
+hover_raises = false
+
+[input.cursor]
+theme = "breeze_cursors"
+size = 24
+hide_when_typing = true
+
+# Verify your connector name and native mode on Aurora/Asahi with: umbriel outputs
+# Omit `mode` to use the panel's preferred mode automatically (e.g. 3024x1964@120 on 14" MBP).
+[output.eDP-1]
+# mode = "3024x1964@120"
+position = [0, 0]
+scale = 2.0
+focus_at_startup = true
+workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
+workspace_axis = "horizontal"
+
+[layout]
+mode = "dwindle"
+gap = 8
+dwindle.preserve_split = true
+
+[layout.scrolling]
+center_focused = "never"
+default_extent_fraction = 0.65
+
+[appearance]
+border_width = 2
+corner_radius = 12
+
+[appearance.blur]
+enabled = true
+radius = 6
+passes = 3
+noise = 0.02
+contrast = 1.05
+brightness = 1.0
+saturation = 1.2
+
+[animation.dim_unfocused]
+enabled = true
+dim = 0.10
+
+# Note on Modifiers (MacBook keyboard):
+#   Mod = Command (Super), Alt = Option, Ctrl = Control
+#   On Aurora/Asahi 14" MBP, F1/F2 emit XF86MonBrightness* natively;
+#   Mod+XF86MonBrightness* adjusts keyboard backlight via Noctalia OSD.
+[keybinds]
+# Overview & Noctalia Shell
+"Mod+Tab" = "overview-toggle"
+"Mod+Space" = "spawn noctalia msg panel-toggle launcher"
+"Alt+Tab" = "spawn noctalia msg window-switcher"
+"Mod+backslash" = "spawn noctalia msg panel-toggle control-center"
+"Mod+X" = "spawn noctalia msg panel-toggle control-center"
+"Mod+Z" = "spawn noctalia msg settings-toggle"
+"Mod+V" = "spawn noctalia msg panel-toggle clipboard"
+"Mod+L" = "spawn noctalia msg session lock"
+"Mod+Alt+C" = "spawn noctalia msg panel-toggle session"
+"Mod+A" = "spawn noctalia msg panel-toggle control-center audio"
+"Mod+M" = "spawn noctalia msg panel-toggle control-center media"
+"Mod+P" = "spawn noctalia msg panel-toggle oldirtty/color_picker:panel"
+"Mod+period" = "spawn noctalia msg panel-toggle liamwh/emoji-picker:desktop"
+"Mod+Alt+W" = "spawn noctalia msg panel-toggle wallpaper"
+
+# Applications
+"Mod+T" = "spawn ghostty"
+"Mod+Return" = "spawn zen-browser"
+"Mod+B" = "spawn zen-browser"
+"Mod+E" = "spawn env QT_QPA_PLATFORMTHEME=kde dolphin"
+"Mod+C" = "spawn noctalia msg panel-toggle yuuto/calculator:panel"
+"Ctrl+Shift+Escape" = "spawn ghostty -e btop"
+
+# Window actions (macOS-like Cmd+Q close; Cmd+Shift+Q force kill)
+"Mod+Q" = "window-close"
+"Mod+Shift+Q" = "window-kill"
+"Mod+F" = "window-toggle-floating"
+"Ctrl+Alt+Space" = "window-toggle-floating"
+"Mod+W" = "window-toggle-maximize-to-edges"
+"Mod+Shift+W" = "window-toggle-fullscreen"
+"Mod+J" = "layout-toggle-split"
+"Mod+Shift+P" = "window-toggle-pinned"
+"Mod+Escape" = "session-quit"
+
+# Scratchpad
+"Mod+S" = "scratchpad-toggle"
+"Mod+Alt+S" = "window-move-to-scratchpad"
+"Mod+Shift+S" = "window-restore-from-scratchpad"
+
+# Focus & Movement
+"Mod+Left" = "window-focus-left"
+"Mod+Shift+Left" = "window-move-left"
+"Mod+Right" = "window-focus-right"
+"Mod+Shift+Right" = "window-move-right"
+"Mod+Up" = "window-focus-up"
+"Mod+Shift+Up" = "window-move-up"
+"Mod+Down" = "window-focus-down"
+"Mod+Shift+Down" = "window-move-down"
+
+# Workspaces on Mod+Alt (Command+Option), keeping Mod+Shift+3/4/5 free for screenshots
+"Mod+Alt+Left" = "workspace-previous"
+"Mod+Alt+Right" = "workspace-next"
+"Mod+WheelDown" = "spawn /home/bry/.local/bin/umbriel-smart-scroll down"
+"Mod+WheelUp" = "spawn /home/bry/.local/bin/umbriel-smart-scroll up"
+
+"Mod+Alt+1" = "workspace-switch 1"
+"Mod+Ctrl+1" = "window-move-to-workspace 1"
+"Mod+Alt+2" = "workspace-switch 2"
+"Mod+Ctrl+2" = "window-move-to-workspace 2"
+"Mod+Alt+3" = "workspace-switch 3"
+"Mod+Ctrl+3" = "window-move-to-workspace 3"
+"Mod+Alt+4" = "workspace-switch 4"
+"Mod+Ctrl+4" = "window-move-to-workspace 4"
+"Mod+Alt+5" = "workspace-switch 5"
+"Mod+Ctrl+5" = "window-move-to-workspace 5"
+"Mod+Alt+6" = "workspace-switch 6"
+"Mod+Ctrl+6" = "window-move-to-workspace 6"
+"Mod+Alt+7" = "workspace-switch 7"
+"Mod+Ctrl+7" = "window-move-to-workspace 7"
+"Mod+Alt+8" = "workspace-switch 8"
+"Mod+Ctrl+8" = "window-move-to-workspace 8"
+"Mod+Alt+9" = "workspace-switch 9"
+"Mod+Ctrl+9" = "window-move-to-workspace 9"
+
+# Screenshots (macOS-style Command+Shift+3/4/5 via Noctalia)
+"Mod+Shift+3" = "spawn noctalia msg screenshot-fullscreen"
+"Mod+Shift+4" = "spawn noctalia msg screenshot-region"
+"Mod+Shift+5" = "spawn noctalia msg screenshot-annotate"
+
+# Brightness, Keyboard Backlight & Media
+"XF86MonBrightnessUp" = { action = "spawn noctalia msg brightness-up", allow_when_locked = true }
+"XF86MonBrightnessDown" = { action = "spawn noctalia msg brightness-down", allow_when_locked = true }
+"Mod+XF86MonBrightnessUp" = { action = "spawn noctalia msg keyboard-backlight-up", allow_when_locked = true }
+"Mod+XF86MonBrightnessDown" = { action = "spawn noctalia msg keyboard-backlight-down", allow_when_locked = true }
+"XF86AudioRaiseVolume" = { action = "spawn noctalia msg volume-up", allow_when_locked = true }
+"XF86AudioLowerVolume" = { action = "spawn noctalia msg volume-down", allow_when_locked = true }
+"XF86AudioMute" = { action = "spawn noctalia msg volume-mute", allow_when_locked = true, repeat = false }
+"XF86AudioPlay" = { action = "spawn noctalia msg media toggle", allow_when_locked = true, repeat = false }
+"XF86AudioPause" = { action = "spawn noctalia msg media toggle", allow_when_locked = true, repeat = false }
+"XF86AudioNext" = { action = "spawn noctalia msg media next", allow_when_locked = true }
+"XF86AudioPrev" = { action = "spawn noctalia msg media previous", allow_when_locked = true }
+
+# Window Rules (MacBook-portable)
+[[window_rule]]
+match.app_id = "^(ghostty|com[.]mitchellh[.]ghostty|kitty|alacritty|dev[.]noctalia[.]Noctalia|.*[Cc]alc.*|org[.]pulseaudio[.]pavucontrol|blueman-manager|kvantummanager|qt5ct|qt6ct|nwg-look|.*satty.*)$"
+default_floating = true
+
+[[window_rule]]
+match.app_id = "^dev[.]noctalia[.]UmbrielSharePicker$"
+default_floating = true
+default_floating_size_px = { width = 800, height = 600 }
+
+[[window_rule]]
+match.app_id = "^(org[.]kde[.]dolphin|org[.]gnome[.]Nautilus|org[.]freedesktop[.]impl[.]portal[.]desktop[.].*)$"
+default_floating = true
+default_floating_size = { width = 0.65, height = 0.75 }
+
+[[window_rule]]
+match.title = "^[Pp]icture[- ]?[Ii]n[- ]?[Pp]icture"
+default_floating = true
+default_pinned = true
+default_floating_size = { width = 0.25, height = 0.25 }
+
+# Smart borders: hide border when a single tiled window occupies the workspace
+[[window_rule]]
+match.is_alone = true
+match.is_floating = false
+border_width = 0
+
+[[window_rule]]
+blur = true
+
+[[window_rule]]
+match.app_id = "^([Zz]en.*|zen.*)$"
+blur = true
+blur_popups = true
+background_render = true
+
+[[layer_rule]]
+match.namespace = '^noctalia-(bar-[^"]+|notification|dock|panel|attached-panel|osd|desktop-widget-[^"]*)$'
+blur = true
+blur_ignore_alpha = 0.5
+blur_popups = true
+
+[[layer_rule]]
+match.namespace = "^noctalia-(notification|dock|panel|attached-panel|osd)$"
+blur_optimized = false

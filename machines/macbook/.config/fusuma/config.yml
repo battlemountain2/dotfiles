@@ -1,0 +1,17 @@
+# 3-finger swipe up/down for Umbriel Overview on MacBook touchpad
+# Requires: fusuma + membership in the `input` group (`sudo usermod -aG input $USER`)
+# Note: Horizontal 3-finger swipes are intentionally omitted so Umbriel's
+#       built-in 3-finger horizontal workspace swipe continues to work natively.
+
+swipe:
+  3:
+    up:
+      command: "umbriel msg overview-open"
+    down:
+      command: "umbriel msg overview-close"
+
+threshold:
+  swipe: 0.35
+
+interval:
+  swipe: 0.5

@@ -1,0 +1,211 @@
+[accessibility]
+ui_scale = 1.0
+
+# Attached plugin panels inherit the fully transparent bar background.
+# Floating panels use shell.panel.transparency_mode = "solid" instead.
+[plugin_settings."noctalia/wallhaven"]
+browser_placement = "floating"
+
+[plugin_settings."yuuto/calculator"]
+panel_placement = "floating"
+
+[plugin_settings."raycursive/discord-voice"]
+panel_placement = "floating"
+
+[bar.default]
+position = "top"
+thickness = 38
+scale = 1.05
+margin_edge = 6
+margin_ends = 14
+radius_top_left = 16
+radius_top_right = 16
+radius_bottom_left = 0
+radius_bottom_right = 0
+background_opacity = 0.0
+capsule_opacity = 0.70
+shadow = false
+hover_highlight = true
+auto_hide = false
+smart_auto_hide = false
+reserve_space = true
+layer = "overlay"
+
+start = [ "workspaces", "media" ]
+center = [ "group:g_center" ]
+end = [ "privacy", "tray", "group:g_right" ]
+
+    [[bar.default.capsule_group]]
+    id = "g_center"
+    members = [ "weather", "clock", "nightlight" ]
+    fill = "on_secondary"
+    opacity = 0.70
+    padding = 6.0
+
+    [[bar.default.capsule_group]]
+    id = "g_right"
+    members = [ "volume", "network", "notifications", "brightness", "battery" ]
+    fill = "on_secondary"
+    opacity = 0.70
+    padding = 6.0
+
+[dock]
+enabled = true
+background_opacity = 0.70
+launcher_icon = "rocket"
+launcher_position = "start"
+reserve_space = false
+show_dots = true
+smart_auto_hide = true
+
+[idle]
+pre_action_fade_seconds = 2.0
+
+    [idle.behavior.screen-off]
+    timeout = 900
+    command = "noctalia:dpms-off"
+    resume_command = "noctalia:dpms-on"
+    enabled = true
+
+    [idle.behavior.lock]
+    timeout = 1800
+    command = "noctalia:session lock"
+    enabled = false
+
+[shell]
+time_format = "{:%I:%M %p}"
+clipboard_image_action_command = "noctalia msg annotate {path}"
+launch_apps_as_systemd_services = true
+polkit_agent = false
+settings_show_advanced = true
+
+    [shell.panel]
+    control_center_placement = "floating"
+    control_center_position = "auto"
+    open_near_click_control_center = true
+    wallpaper_placement = "floating"
+    wallpaper_position = "auto"
+    session_placement = "floating"
+    session_position = "center"
+    floating_offset = 8
+    transparency_mode = "solid"
+
+    [shell.screenshot]
+    copy_to_clipboard = true
+    pipe_to_command = true
+    pipe_command = "satty -f - --output-filename Screenshot-$(date +%F_%H-%M-%S).png"
+    save_to_file = false
+
+    [[shell.session.actions]]
+    action = "lock"
+    countdown_seconds = 0.0
+    enabled = true
+    shortcut = "1"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "logout"
+    countdown_seconds = 0.0
+    enabled = true
+    shortcut = "2"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "lock_and_suspend"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "3"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "reboot"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "4"
+    variant = "default"
+
+    [[shell.session.actions]]
+    action = "shutdown"
+    countdown_seconds = 3.0
+    enabled = true
+    shortcut = "5"
+    variant = "destructive"
+
+[system.monitor]
+gpu_poll_seconds = 2
+
+[theme]
+mode = "dark"
+source = "wallpaper"
+wallpaper_scheme = "m3-tonal-spot"
+
+    [theme.templates]
+    enable_builtin_templates = true
+    enable_community_templates = true
+    builtin_ids = [ "btop", "gtk3", "gtk4", "kcolorscheme", "kitty", "qt", "alacritty", "ghostty", "umbriel" ]
+    community_ids = [
+        "antigravity",
+        "claude-code",
+        "codex",
+        "discord",
+        "fastfetch",
+        "hyprtoolkit",
+        "obs",
+        "prismlauncher",
+        "steam",
+        "zed"
+    ]
+
+[widget.workspaces]
+style = "focus_hint"
+show_icons = true
+labels_only_when_occupied = true
+hide_when_empty = true
+show_labels = false
+active_pill_size = 2.2
+inactive_pill_size = 1.0
+pill_scale = 0.85
+capsule = true
+capsule_fill = "on_secondary"
+
+[widget.media]
+hide_when_no_media = true
+title_scroll = "on_hover"
+show_progress = true
+capsule = true
+capsule_fill = "on_secondary"
+
+[widget.clock]
+color = "secondary"
+format = "{:%I:%M %p • %a, %b %d}"
+
+[widget.weather]
+color = "secondary"
+show_temperature = true
+show_condition = false
+
+[widget.privacy]
+capsule = true
+capsule_fill = "on_secondary"
+
+[widget.tray]
+capsule = true
+capsule_fill = "on_secondary"
+
+[widget.nightlight]
+
+[widget.brightness]
+
+[widget.volume]
+
+[widget.network]
+
+[widget.notifications]
+
+[widget.session]
+color = "error"
+capsule = true
+capsule_fill = "on_secondary"
+
+[calendar]
+event_time_format = "%I:%M %p"
