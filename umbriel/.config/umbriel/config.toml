@@ -23,7 +23,7 @@ middle_click_paste = false
 accel_profile = "flat"
 
 [input.focus]
-follows_mouse = true
+follows_mouse = "sloppy"
 follows_mouse_max_scroll = 0.0
 hover_raises = false
 

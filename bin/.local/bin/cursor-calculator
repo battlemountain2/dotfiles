@@ -1,2 +1,18 @@
 #!/bin/sh
-exec /home/bry/.local/share/noctalia-cursor-calculator/bin/cursor-calculator-rust "$@"
+# Launch Cursor Calculator (Rust layer-shell popup), with graceful fallbacks
+# for fresh installs, other compositors, or environments without the binary.
+
+if [ -x "$HOME/.local/share/noctalia-cursor-calculator/bin/cursor-calculator-rust" ]; then
+    exec "$HOME/.local/share/noctalia-cursor-calculator/bin/cursor-calculator-rust" "$@"
+elif [ -x "$HOME/Projects/cursor-calculator/target/release/cursor-calculator" ]; then
+    exec "$HOME/Projects/cursor-calculator/target/release/cursor-calculator" "$@"
+elif command -v noctalia >/dev/null 2>&1; then
+    exec noctalia msg panel-toggle yuuto/calculator:panel
+elif command -v qalculate-gtk >/dev/null 2>&1; then
+    exec qalculate-gtk "$@"
+elif command -v gnome-calculator >/dev/null 2>&1; then
+    exec gnome-calculator "$@"
+else
+    notify-send "Calculator" "No calculator application found" 2>/dev/null
+    exit 1
+fi

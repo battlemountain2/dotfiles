@@ -40,7 +40,7 @@ disable_while_typing = true
 scroll_factor = 0.4
 
 [input.focus]
-follows_mouse = true
+follows_mouse = "sloppy"
 follows_mouse_max_scroll = 0.0
 hover_raises = false
 
